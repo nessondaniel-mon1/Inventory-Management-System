@@ -7,6 +7,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import { useInventory } from '../hooks/useInventory';
 import type { Customer, Bill, Payment, ReceiptSettings, Sale } from '../types';
+import { PrintablePaymentReceipt, PrintableBillReceipt } from '../components/common/PrintableReceipts';
 
 // FIX: The `title` prop was causing a TypeScript error because it is not a standard property in React's SVG type definitions. The component has been updated to accept a `title` prop and render it as an accessible <title> element inside the SVG, which also provides a tooltip on hover.
 const RepeatIcon = ({ title, ...props }: React.SVGProps<SVGSVGElement> & { title?: string }) => (
@@ -19,120 +20,6 @@ const RepeatIcon = ({ title, ...props }: React.SVGProps<SVGSVGElement> & { title
 
 type NewBillState = Omit<Bill, 'id' | 'status' | 'amount'> & {
     amount: number | string;
-};
-
-interface PrintablePaymentReceiptProps {
-    payment: Payment;
-    customer: Customer;
-    receiptSettings: ReceiptSettings;
-}
-
-const PrintablePaymentReceipt: React.FC<PrintablePaymentReceiptProps> = ({ payment, customer, receiptSettings }) => {
-    const previousBalance = (payment.balanceAfterPayment ?? 0) + payment.amount;
-
-    return (
-        <div className={`printable-receipt p-2 font-mono text-black bg-white text-${receiptSettings.fontSize || 'xs'}`}>
-            <div className="text-center">
-                {receiptSettings.logo && <img src={receiptSettings.logo} alt="logo" className="max-h-16 mx-auto mb-2" />}
-                <h2 className="text-base font-bold">INVENTORY PRO</h2>
-                <p className="text-[10px]">123 Business Rd, Commerce City, 12345</p>
-                <p className="text-[10px]">Tel: (123) 456-7890</p>
-                <hr className="my-1 border-dashed border-black" />
-                <h3 className="text-sm font-bold">PAYMENT RECEIPT</h3>
-            </div>
-            <div className="text-[10px] space-y-0.5 mt-2">
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Payment ID:</span>
-                    <span className="text-right truncate">{payment.id}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Date:</span>
-                    <span className="text-right truncate">{new Date(payment.date).toLocaleString()}</span>
-                </div>
-                 <div className="grid grid-cols-2 gap-x-2">
-                    <span>Customer:</span>
-                    <span className="text-right truncate">{customer.name}</span>
-                </div>
-                 <div className="grid grid-cols-2 gap-x-2">
-                    <span>Account Type:</span>
-                    <span className="capitalize text-right">{customer.type}</span>
-                </div>
-            </div>
-            <hr className="my-1 border-dashed border-black" />
-            <div className="text-xs space-y-0.5">
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Previous Balance:</span>
-                    <span className="text-right">${previousBalance.toFixed(2)}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-2 font-bold text-base mt-1">
-                    <span>AMOUNT PAID:</span>
-                    <span className="text-right">${payment.amount.toFixed(2)}</span>
-                </div>
-            </div>
-            <hr className="my-1 border-dashed border-black" />
-             <div className="grid grid-cols-2 gap-x-2 font-bold text-base">
-                <span>Remaining Balance:</span>
-                <span className="text-right">${payment.balanceAfterPayment?.toFixed(2)}</span>
-            </div>
-            <hr className="my-1 border-dashed border-black" />
-            <div className="text-[10px] space-y-0.5">
-                 <div className="grid grid-cols-2 gap-x-2">
-                    <span>Method:</span>
-                    <span className="text-right">Payment on Account</span>
-                </div>
-            </div>
-            <p className="text-center text-[10px] mt-2">{receiptSettings.footerText || 'Thank you for your payment!'}</p>
-        </div>
-    );
-};
-
-interface PrintableBillReceiptProps {
-    bill: Bill & { paidDate: Date; employeeId?: string; };
-    getEmployeeName: (id: string) => string;
-    receiptSettings: ReceiptSettings;
-}
-
-const PrintableBillReceipt: React.FC<PrintableBillReceiptProps> = ({ bill, getEmployeeName, receiptSettings }) => {
-    return (
-        <div className={`printable-receipt p-2 font-mono text-black bg-white text-${receiptSettings.fontSize || 'xs'}`}>
-            <div className="text-center">
-                {receiptSettings.logo && <img src={receiptSettings.logo} alt="logo" className="max-h-16 mx-auto mb-2" />}
-                <h2 className="text-base font-bold">INVENTORY PRO</h2>
-                <hr className="my-1 border-dashed border-black" />
-                <h3 className="text-sm font-bold uppercase">Paid Bill Receipt</h3>
-            </div>
-            <div className="text-[10px] space-y-0.5 mt-2">
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Date Paid:</span>
-                    <span className="text-right truncate">{new Date(bill.paidDate).toLocaleString()}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Vendor:</span>
-                    <span className="text-right truncate">{bill.vendor}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Paid By:</span>
-                    <span className="text-right truncate">{bill.employeeId ? getEmployeeName(bill.employeeId) : 'N/A'}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-2">
-                    <span>Category:</span>
-                    <span className="text-right truncate">{bill.category}</span>
-                </div>
-            </div>
-            <hr className="my-1 border-dashed border-black" />
-            <div className="my-1 text-xs">
-                <p className="font-semibold text-[10px]">DESCRIPTION:</p>
-                <p>{bill.description}</p>
-            </div>
-            <hr className="my-1 border-dashed border-black" />
-            <div className="grid grid-cols-2 gap-x-2 font-bold text-base mt-2">
-                <span>AMOUNT PAID:</span>
-                <span className="text-right">${bill.amount.toFixed(2)}</span>
-            </div>
-            <hr className="my-1 border-dashed border-black" />
-            <p className="text-center text-[10px] mt-2">{receiptSettings.footerText || 'Thank you!'}</p>
-        </div>
-    );
 };
 
 const Payments: React.FC = () => {
@@ -324,7 +211,7 @@ const Payments: React.FC = () => {
                 const year = String(paidDate.getFullYear());
                 const dayMatch = !searchDay || day.startsWith(day);
                 const monthMatch = !searchMonth || month.startsWith(month);
-                const yearMatch = !searchYear || year.startsWith(searchYear);
+                const yearMatch = !searchYear || year.startsWith(year);
                 matchesDate = dayMatch && monthMatch && yearMatch;
             }
 
