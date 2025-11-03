@@ -8,6 +8,7 @@ import type { SaleItem, Product, PaymentMethod, PaymentStatus, Sale, ReceiptSett
 import Modal from '../components/ui/Modal';
 import Table from '../components/ui/Table';
 import { PrintableReceipt } from '../components/common/PrintableReceipts';
+import Spinner from '../components/ui/Spinner';
 
 const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const MinusIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -96,6 +97,7 @@ const Accounting: React.FC = () => {
     const [saleToPrint, setSaleToPrint] = useState<Sale | null>(null);
     const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'credit' | 'invoice'>('all');
+    const [isSaving, setIsSaving] = useState(false);
     
     // Overall cart discount
     const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
@@ -294,47 +296,55 @@ const Accounting: React.FC = () => {
             return;
         }
 
-        const saleData: any = {
-            items: cart.map(item => ({ ...item, quantity: Number(item.quantity) || 1 })),
-            paymentMethod,
-            paymentStatus,
-            employeeId: currentUser.id,
-        };
-        if (paymentStatus === 'credit' || paymentStatus === 'invoice') {
-            saleData.customerId = selectedCustomer;
-        }
-        if (paymentStatus === 'invoice') {
-            saleData.invoiceDetails = { invoiceNumber: invoiceNumber.trim() };
-        }
-        const numDiscountValue = Number(discountValue) || 0;
-        if (numDiscountValue > 0) {
-            saleData.discount = {
-                type: discountType,
-                value: numDiscountValue
+        setIsSaving(true);
+        try {
+            const saleData: any = {
+                items: cart.map(item => ({ ...item, quantity: Number(item.quantity) || 1 })),
+                paymentMethod,
+                paymentStatus,
+                employeeId: currentUser.id,
             };
+            if (paymentStatus === 'credit' || paymentStatus === 'invoice') {
+                saleData.customerId = selectedCustomer;
+            }
+            if (paymentStatus === 'invoice') {
+                saleData.invoiceDetails = { invoiceNumber: invoiceNumber.trim() };
+            }
+            const numDiscountValue = Number(discountValue) || 0;
+            if (numDiscountValue > 0) {
+                saleData.discount = {
+                    type: discountType,
+                    value: numDiscountValue
+                };
+            }
+            const numTaxValue = Number(taxValue) || 0;
+            if (numTaxValue > 0) {
+                saleData.tax = {
+                    type: taxType,
+                    value: numTaxValue
+                };
+            }
+            
+            const newSale = await addSale(saleData);
+            setSaleToPrint(newSale);
+            setToastMessage({ message: `Sale #${newSale.receiptNumber} saved successfully.`, type: 'success' });
+            
+            // Reset state
+            setCart([]);
+            setPaymentMethod('cash');
+            setPaymentStatus('paid');
+            setSelectedCustomer('');
+            setInvoiceNumber('');
+            setDiscountType('fixed');
+            setDiscountValue('');
+            setTaxType('percentage');
+            setTaxValue('');
+        } catch (error) {
+            console.error("Failed to save sale:", error);
+            setToastMessage({ message: "An error occurred while saving the sale. Please try again.", type: 'error' });
+        } finally {
+            setIsSaving(false);
         }
-        const numTaxValue = Number(taxValue) || 0;
-        if (numTaxValue > 0) {
-            saleData.tax = {
-                type: taxType,
-                value: numTaxValue
-            };
-        }
-        
-        const newSale = await addSale(saleData);
-        setSaleToPrint(newSale);
-        setToastMessage({ message: `Sale #${newSale.receiptNumber} saved successfully.`, type: 'success' });
-        
-        // Reset state
-        setCart([]);
-        setPaymentMethod('cash');
-        setPaymentStatus('paid');
-        setSelectedCustomer('');
-        setInvoiceNumber('');
-        setDiscountType('fixed');
-        setDiscountValue('');
-        setTaxType('percentage');
-        setTaxValue('');
     };
 
     const handlePrint = () => {
@@ -533,12 +543,13 @@ const Accounting: React.FC = () => {
                                 className="w-full" 
                                 onClick={handleSaveSale} 
                                 disabled={
+                                    isSaving ||
                                     cart.length === 0 || 
                                     ((paymentStatus === 'credit' || paymentStatus === 'invoice') && !selectedCustomer) ||
                                     (paymentStatus === 'invoice' && !invoiceNumber.trim())
                                 }
                             >
-                                Save Sale
+                                {isSaving ? <Spinner size="sm" /> : 'Save Sale'}
                             </Button>
                         </div>
                     </Card>
