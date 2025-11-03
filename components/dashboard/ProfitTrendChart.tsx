@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Card from '../ui/Card';
 import type { Sale } from '../../types';
 import { useInventory } from '../../hooks/useInventory';
@@ -7,122 +7,92 @@ import Button from '../ui/Button';
 
 type TimeFrame = 'daily' | 'weekly' | 'monthly';
 
-const SalesChart: React.FC = () => {
+const ProfitTrendChart: React.FC = () => {
     const { sales } = useInventory();
     const [timeFrame, setTimeFrame] = useState<TimeFrame>('daily');
     
     const processData = (sales: Sale[], frame: TimeFrame) => {
-        // A map to store sales aggregated by day (YYYY-MM-DD). This is the base for all calculations.
-        const salesByDate = new Map<string, { cash: number; credit: number }>();
+        const profitByDate = new Map<string, number>();
         sales.forEach(sale => {
             const dateKey = new Date(sale.date).toISOString().split('T')[0];
-            if (!salesByDate.has(dateKey)) {
-                salesByDate.set(dateKey, { cash: 0, credit: 0 });
-            }
-            const entry = salesByDate.get(dateKey)!;
-            if (sale.paymentStatus === 'credit' || sale.paymentStatus === 'invoice') {
-                entry.credit += sale.total;
-            } else {
-                entry.cash += sale.total;
-            }
+            const currentProfit = profitByDate.get(dateKey) || 0;
+            profitByDate.set(dateKey, currentProfit + sale.profit);
         });
-    
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-    
+
         if (frame === 'daily') {
             const data = [];
-            // Generate data for the last 7 days
             for (let i = 6; i >= 0; i--) {
                 const date = new Date(today);
                 date.setDate(today.getDate() - i);
                 const dateKey = date.toISOString().split('T')[0];
-                const salesData = salesByDate.get(dateKey) || { cash: 0, credit: 0 };
                 data.push({
                     name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    cash: salesData.cash,
-                    credit: salesData.credit,
+                    profit: profitByDate.get(dateKey) || 0,
                 });
             }
             return data;
         }
-    
+
         if (frame === 'weekly') {
-            // Aggregate daily sales into weekly buckets
-            const weeklyData = new Map<string, { cash: number; credit: number }>();
-            salesByDate.forEach((value, dateKey) => {
-                const date = new Date(dateKey + 'T12:00:00'); // Use noon to avoid timezone boundary issues
+            const weeklyData = new Map<string, number>();
+            profitByDate.forEach((profit, dateKey) => {
+                const date = new Date(dateKey + 'T12:00:00');
                 const dayOfWeek = date.getDay();
                 const weekStartDate = new Date(date);
                 weekStartDate.setDate(date.getDate() - dayOfWeek);
                 const weekKey = weekStartDate.toISOString().split('T')[0];
-    
-                if (!weeklyData.has(weekKey)) {
-                    weeklyData.set(weekKey, { cash: 0, credit: 0 });
-                }
-                const entry = weeklyData.get(weekKey)!;
-                entry.cash += value.cash;
-                entry.credit += value.credit;
+                const currentProfit = weeklyData.get(weekKey) || 0;
+                weeklyData.set(weekKey, currentProfit + profit);
             });
-    
+
             const data = [];
-            // Generate data for the last 4 weeks
             const currentWeekStart = new Date(today);
             currentWeekStart.setDate(today.getDate() - today.getDay());
-    
             for (let i = 3; i >= 0; i--) {
                 const weekStart = new Date(currentWeekStart);
                 weekStart.setDate(currentWeekStart.getDate() - (i * 7));
                 const weekKey = weekStart.toISOString().split('T')[0];
-                const salesData = weeklyData.get(weekKey) || { cash: 0, credit: 0 };
                 data.push({
                     name: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    cash: salesData.cash,
-                    credit: salesData.credit,
+                    profit: weeklyData.get(weekKey) || 0,
                 });
             }
             return data;
         }
-        
+
         if (frame === 'monthly') {
-            // Aggregate daily sales into monthly buckets
-            const monthlyData = new Map<string, { cash: number; credit: number }>();
-            salesByDate.forEach((value, dateKey) => {
+            const monthlyData = new Map<string, number>();
+            profitByDate.forEach((profit, dateKey) => {
                 const monthKey = dateKey.substring(0, 7); // YYYY-MM
-                if (!monthlyData.has(monthKey)) {
-                    monthlyData.set(monthKey, { cash: 0, credit: 0 });
-                }
-                const entry = monthlyData.get(monthKey)!;
-                entry.cash += value.cash;
-                entry.credit += value.credit;
+                const currentProfit = monthlyData.get(monthKey) || 0;
+                monthlyData.set(monthKey, currentProfit + profit);
             });
-    
+
             const data = [];
-            // Generate data for the last 6 months
             const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             for (let i = 5; i >= 0; i--) {
                 const date = new Date(currentMonth);
                 date.setMonth(currentMonth.getMonth() - i);
                 const monthKey = date.toISOString().substring(0, 7);
-                const salesData = monthlyData.get(monthKey) || { cash: 0, credit: 0 };
                 data.push({
                     name: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-                    cash: salesData.cash,
-                    credit: salesData.credit,
+                    profit: monthlyData.get(monthKey) || 0,
                 });
             }
             return data;
         }
-    
         return [];
     };
 
     const chartData = processData(sales, timeFrame);
-    
+
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Sales Overview</h3>
+                <h3 className="text-lg font-semibold">Profit Trend</h3>
                 <div className="space-x-2">
                     {(['daily', 'weekly', 'monthly'] as TimeFrame[]).map(frame => (
                          <Button key={frame} size="sm" variant={timeFrame === frame ? 'primary' : 'ghost'} onClick={() => setTimeFrame(frame)}>
@@ -133,19 +103,18 @@ const SalesChart: React.FC = () => {
             </div>
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
-                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} />
-                        <Tooltip />
+                        <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
+                        <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
                         <Legend />
-                        <Bar dataKey="cash" stackId="a" fill="#10b981" name="Cash Sales" maxBarSize={40} />
-                        <Bar dataKey="credit" stackId="a" fill="#f59e0b" name="Credit/Invoice" maxBarSize={40} />
-                    </BarChart>
+                        <Line type="monotone" dataKey="profit" stroke="#10b981" name="Profit" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                    </LineChart>
                 </ResponsiveContainer>
             </div>
         </Card>
     );
 };
 
-export default SalesChart;
+export default ProfitTrendChart;

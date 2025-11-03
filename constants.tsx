@@ -13,6 +13,9 @@ const CalculatorIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const CreditCardIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
 );
+const WalletIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12"/><path d="M16 12h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 0-4Z"/></svg>
+);
 const PackageIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16.5 9.4a4.5 4.5 0 1 1-9 0"/><path d="M12 12.9a7.5 7.5 0 0 1 7.4-6 4.5 4.5 0 1 1-2.5 8.2"/><path d="M12 12.9a7.5 7.5 0 0 0-7.4-6 4.5 4.5 0 1 0 2.5 8.2"/><path d="M12 12.9v10.1"/><path d="M12 18.5a2.5 2.5 0 0 1-2.5-2.5h5a2.5 2.5 0 0 1-2.5 2.5Z"/></svg>
 );
@@ -31,6 +34,7 @@ export const NAV_ITEMS: { id: Page; label: string; icon: React.FC<React.SVGProps
     { id: 'sales', label: 'Sales', icon: ShoppingCartIcon },
     { id: 'accounting', label: 'Accounting', icon: CalculatorIcon },
     { id: 'credits', label: 'Credits & Invoice', icon: CreditCardIcon },
+    { id: 'payments', label: 'Payments', icon: WalletIcon },
     { id: 'products', label: 'Products', icon: PackageIcon },
     { id: 'suppliers', label: 'Suppliers', icon: TruckIcon },
     { id: 'analytics', label: 'Analytics', icon: BarChartIcon },
