@@ -12,9 +12,11 @@ const ProfitTrendChart: React.FC = () => {
     const [timeFrame, setTimeFrame] = useState<TimeFrame>('daily');
     
     const processData = (sales: Sale[], frame: TimeFrame) => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
         const profitByDate = new Map<string, number>();
         sales.forEach(sale => {
-            const dateKey = new Date(sale.date).toISOString().split('T')[0];
+            const saleDate = new Date(sale.date);
+            const dateKey = `${saleDate.getFullYear()}-${pad(saleDate.getMonth() + 1)}-${pad(saleDate.getDate())}`;
             const currentProfit = profitByDate.get(dateKey) || 0;
             profitByDate.set(dateKey, currentProfit + sale.profit);
         });
@@ -27,7 +29,7 @@ const ProfitTrendChart: React.FC = () => {
             for (let i = 6; i >= 0; i--) {
                 const date = new Date(today);
                 date.setDate(today.getDate() - i);
-                const dateKey = date.toISOString().split('T')[0];
+                const dateKey = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
                 data.push({
                     name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                     profit: profitByDate.get(dateKey) || 0,
@@ -89,6 +91,23 @@ const ProfitTrendChart: React.FC = () => {
 
     const chartData = processData(sales, timeFrame);
 
+    const maxVal = Math.max(...chartData.map(d => d.profit), 5000000);
+    const tickInterval = 1000000;
+    const ticks = [];
+    for (let i = tickInterval; i <= maxVal; i += tickInterval) {
+        ticks.push(i);
+    }
+
+    const formatYAxis = (tick: number) => {
+        if (tick >= 1000000) {
+            return `${tick / 1000000}M`;
+        }
+        if (tick >= 1000) {
+            return `${tick / 1000}K`;
+        }
+        return tick;
+    };
+
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
@@ -103,10 +122,10 @@ const ProfitTrendChart: React.FC = () => {
             </div>
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
-                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
+                        <YAxis tick={{ fontSize: 12 }} ticks={ticks} domain={[0, 'dataMax']} tickFormatter={formatYAxis} />
                         <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
                         <Legend />
                         <Line type="monotone" dataKey="profit" stroke="#10b981" name="Profit" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 8 }} />
@@ -116,5 +135,6 @@ const ProfitTrendChart: React.FC = () => {
         </Card>
     );
 };
+
 
 export default ProfitTrendChart;

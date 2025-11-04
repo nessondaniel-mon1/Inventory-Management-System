@@ -5,9 +5,10 @@ interface CardProps {
     className?: string;
     title?: string;
     action?: React.ReactNode;
+    contentClassName?: string; // New prop
 }
 
-const Card: React.FC<CardProps> = ({ children, className = '', title, action }) => {
+const Card: React.FC<CardProps> = ({ children, className = '', title, action, contentClassName = '' }) => {
     return (
         <div className={`bg-card rounded-lg shadow-md border border-border ${className}`}>
             {(title || action) && (
@@ -16,7 +17,7 @@ const Card: React.FC<CardProps> = ({ children, className = '', title, action }) 
                     {action && <div>{action}</div>}
                 </div>
             )}
-            <div className="p-6">
+            <div className={`p-6 ${contentClassName}`}> {/* Apply contentClassName here */}
                 {children}
             </div>
         </div>

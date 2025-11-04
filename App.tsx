@@ -21,7 +21,12 @@ const AppContent: React.FC = () => {
     const { currentUser, isLoadingAuth, checkInitialSetup } = useInventory();
     const [currentPage, setCurrentPage] = useState<Page>('dashboard');
     const [needsSetup, setNeedsSetup] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar visibility
     
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     useEffect(() => {
         // This check runs only when the auth state is resolved and there's no user.
         if (!isLoadingAuth && !currentUser) {
@@ -85,9 +90,25 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="flex h-screen bg-background text-text-primary">
-            <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+            <Sidebar
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                isSidebarOpen={isSidebarOpen} // Pass new prop
+                toggleSidebar={toggleSidebar} // Pass new prop
+            />
+            {/* Overlay for small screens when sidebar is open */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    onClick={toggleSidebar}
+                ></div>
+            )}
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                <Header
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    toggleSidebar={toggleSidebar} // Pass new prop
+                />
                 <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
                     {renderPage()}
                 </main>

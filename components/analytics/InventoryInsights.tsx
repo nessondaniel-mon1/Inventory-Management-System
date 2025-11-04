@@ -68,7 +68,7 @@ const InventoryInsights: React.FC = () => {
                             <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
                                 {lowStockProducts.length > 0 ? lowStockProducts.map(p => (
                                     <div key={p.id} className="flex justify-between items-center bg-gray-50 p-2 rounded-md">
-                                        <span>{p.name}</span>
+                                        <span className="truncate max-w-[150px]">{p.name}</span>
                                         <span className="font-bold text-red-600">{p.stock} left</span>
                                     </div>
                                 )) : <p className="text-text-secondary">No low stock items.</p>}
@@ -79,7 +79,7 @@ const InventoryInsights: React.FC = () => {
                             <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
                                 {slowMovingProducts.length > 0 ? slowMovingProducts.map(p => (
                                     <div key={p.id} className="flex justify-between items-center bg-gray-50 p-2 rounded-md">
-                                        <span>{p.name}</span>
+                                        <span className="truncate max-w-[150px]">{p.name}</span>
                                         <span className="font-bold text-yellow-600">{p.stock} in stock</span>
                                     </div>
                                 )) : <p className="text-text-secondary">No slow-moving items detected.</p>}
@@ -99,18 +99,26 @@ const InventoryInsights: React.FC = () => {
                             </div>
                         ) : (
                             suggestions.length > 0 ? (
-                                <div className="max-h-[350px] overflow-y-auto">
-                                    <Table headers={["Product", "Stock", "Days Left", "Suggested Reorder"]}>
+                                <Table headers={["Product", "Stock", "Days Left", "Suggested Reorder"]} scrollable={true} maxHeight="350px">
+                                    <thead>
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Days Left</th>
+                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Suggested Reorder</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         {suggestions.map(s => (
                                             <tr key={s.productId}>
-                                                <td className="px-6 py-2 text-base font-medium">{s.productName}</td>
+                                                <td className="px-6 py-2 text-base font-medium truncate max-w-[150px]">{s.productName}</td>
                                                 <td className="px-6 py-2 text-base text-center">{s.currentStock}</td>
                                                 <td className="px-6 py-2 text-base text-center font-semibold text-red-500">{s.predictedDaysRemaining}</td>
                                                 <td className="px-6 py-2 text-base text-center font-bold text-secondary">{s.suggestedReorderQuantity}</td>
                                             </tr>
                                         ))}
-                                    </Table>
-                                </div>
+                                    </tbody>
+                                </Table>
                             ) : (
                                 <p className="text-center text-text-secondary py-16">Click "Generate Suggestions" to get AI-powered reorder recommendations.</p>
                             )

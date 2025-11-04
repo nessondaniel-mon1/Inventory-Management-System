@@ -249,15 +249,25 @@ const CreditsAndInvoices: React.FC = () => {
                         />
                     </div>
                     <div className="max-h-[450px] overflow-y-auto">
-                        <Table headers={['Name', 'Phone', 'Address', 'Credit Balance']}>
-                            {creditCustomers.map(c => (
-                                <tr key={c.id} onClick={() => openHistoryModal(c)} className="cursor-pointer hover:bg-yellow-100">
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{c.phone}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-xs" title={c.address}>{c.address}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-red-600">${c.creditBalance.toFixed(2)}</td>
+                        <Table headers={['Name', 'Phone', 'Address', 'Balance']} scrollable={true} maxHeight="450px">
+                            <thead>
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
                                 </tr>
-                            ))}
+                            </thead>
+                            <tbody>
+                                {creditCustomers.map(c => (
+                                    <tr key={c.id} onClick={() => openHistoryModal(c)} className="cursor-pointer hover:bg-yellow-100">
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{c.phone}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-xs" title={c.address}>{c.address}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">${c.creditBalance.toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </Table>
                     </div>
                 </Card>
@@ -278,15 +288,25 @@ const CreditsAndInvoices: React.FC = () => {
                         />
                     </div>
                     <div className="max-h-[450px] overflow-y-auto">
-                        <Table headers={['Name', 'Phone', 'Address', 'Balance']}>
-                            {invoiceCustomers.map(c => (
-                                <tr key={c.id} onClick={() => openHistoryModal(c)} className="cursor-pointer hover:bg-yellow-100">
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{c.phone}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-xs" title={c.address}>{c.address}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">${c.creditBalance.toFixed(2)}</td>
+                        <Table headers={['Name', 'Phone', 'Address', 'Balance']} scrollable={true} maxHeight="450px">
+                            <thead>
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
                                 </tr>
-                            ))}
+                            </thead>
+                            <tbody>
+                                {invoiceCustomers.map(c => (
+                                    <tr key={c.id} onClick={() => openHistoryModal(c)} className="cursor-pointer hover:bg-yellow-100">
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{c.phone}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-xs" title={c.address}>{c.address}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">${c.creditBalance.toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </Table>
                     </div>
                 </Card>
@@ -338,16 +358,15 @@ const CreditsAndInvoices: React.FC = () => {
                     </div>
                      {dateSearchError && <p className="text-red-500 text-sm mt-2">{dateSearchError}</p>}
                 </div>
-                <div className="max-h-[550px] overflow-y-auto">
-                    <Table headers={[
-                        { label: 'Receipt', className: 'w-[200px]' },
-                        { label: 'Date', className: 'w-[180px]' },
-                        { label: 'Employee', className: 'w-[150px]' },
-                        { label: 'Customer', className: 'w-[150px]' },
-                        'Items',
-                        { label: 'Total', className: 'w-[100px]' },
-                        { label: 'Status', className: 'w-[80px]' }
-                    ]}>
+                <Table headers={[
+                        { label: 'Receipt', className: 'w-40' },
+                        { label: 'Date', className: 'w-48' },
+                        { label: 'Employee', className: 'w-40' },
+                        { label: 'Customer', className: 'w-40' },
+                        { label: 'Items', className: 'w-64' },
+                        { label: 'Total', className: 'w-32 text-right' },
+                        { label: 'Status', className: 'w-28' }
+                    ]} scrollable={true} maxHeight="550px">
                         {recentCreditsAndInvoices.map(s => (
                             <tr key={s.id} className="cursor-pointer hover:bg-yellow-100" onClick={() => setSaleToReview(s)}>
                                 <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-primary">
@@ -355,14 +374,14 @@ const CreditsAndInvoices: React.FC = () => {
                                         ? `${s.receiptNumber} / ${s.invoiceDetails.invoiceNumber}`
                                         : s.receiptNumber}
                                 </td>
-                                <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{new Date(s.date).toLocaleString()}</td>
-                                <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate" title={getEmployeeName(s.employeeId)}>{getEmployeeName(s.employeeId)}</td>
-                                <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate" title={s.customerId ? getCustomerName(s.customerId) : 'N/A'}>{s.customerId ? getCustomerName(s.customerId) : 'N/A'}</td>
+                                <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-[180px]" title={new Date(s.date).toLocaleString()}>{new Date(s.date).toLocaleString()}</td>
+                                <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-[150px]" title={getEmployeeName(s.employeeId)}>{getEmployeeName(s.employeeId)}</td>
+                                <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-[150px]" title={s.customerId ? getCustomerName(s.customerId) : 'N/A'}>{s.customerId ? getCustomerName(s.customerId) : 'N/A'}</td>
                                 <td className="px-6 py-2 text-base text-text-secondary">
                                     <div className="space-y-1">
                                         {s.items.map(item => (
                                             <div key={item.productId} className="flex justify-between items-center gap-2">
-                                                <span className="truncate min-w-0" title={getProductName(item.productId)}>
+                                                <span className="truncate max-w-[150px]" title={getProductName(item.productId)}>
                                                     {getProductName(item.productId)}
                                                 </span>
                                                 <span className="flex-shrink-0 whitespace-nowrap">
@@ -384,7 +403,6 @@ const CreditsAndInvoices: React.FC = () => {
                             </tr>
                         ))}
                     </Table>
-                </div>
             </Card>
             
             <Modal isOpen={isModalOpen} onClose={closeModal} title="Add New Customer" footer={
@@ -431,6 +449,7 @@ const CreditsAndInvoices: React.FC = () => {
                 title={`History for ${selectedCustomer?.name}`}
                 size="5xl"
                 footer={<Button variant="ghost" onClick={closeHistoryModal}>Close</Button>}
+                scrollable={true}
             >
                 {selectedCustomer && (
                     <div className="space-y-4">
@@ -518,6 +537,7 @@ const CreditsAndInvoices: React.FC = () => {
                     onClose={() => setSaleToReview(null)} 
                     title={`Receipt #${saleToReview.receiptNumber}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrint}>Print Receipt</Button>

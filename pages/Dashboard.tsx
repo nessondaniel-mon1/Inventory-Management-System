@@ -68,10 +68,10 @@ const CashFlowChart: React.FC = () => {
             </div>
             <div style={{ width: '100%', height: 250 }}>
                 <ResponsiveContainer>
-                    <BarChart data={cashFlowData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <BarChart data={cashFlowData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" />
-                        <YAxis />
+                        <YAxis width={100} />
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="Inflow" fill="#10b981" />
@@ -251,15 +251,15 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
                 <Button size="lg" className="w-full" onClick={() => setCurrentPage('suppliers')} leftIcon={<TruckIcon className="w-5 h-5" />}>Add Supplier</Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard title="Today's Sales" value={`$${dailySales.total.toFixed(2)}`} icon={<DollarSignIcon />} color="#4f46e5" change={salesChange.text} changeType={salesChange.type} />
                 <StatCard title="Today's Profit" value={`$${dailySales.profit.toFixed(2)}`} icon={<TrendingUpIcon />} color="#10b981" change={profitChange.text} changeType={profitChange.type} />
-                <StatCard title="Payments Received Today" value={`$${dailyPayments.received.toFixed(2)}`} icon={<WalletIcon />} color="#3b82f6" change={paymentsReceivedChange.text} changeType={paymentsReceivedChange.type} />
+                <StatCard title="Today's Payments" value={`$${dailyPayments.received.toFixed(2)}`} icon={<WalletIcon />} color="#3b82f6" change={paymentsReceivedChange.text} changeType={paymentsReceivedChange.type} />
                 <StatCard title="Total Owed To You" value={`$${totalOwed.toFixed(2)}`} icon={<CreditCardIcon />} color="#f59e0b" />
-                <StatCard title="Bills Paid Today" value={`$${dailyPayments.paid.toFixed(2)}`} icon={<ReceiptIcon />} color="#ef4444" change={billsPaidChange.text} changeType={billsPaidChange.type} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <StatCard title="Bills Paid Today" value={`$${dailyPayments.paid.toFixed(2)}`} icon={<ReceiptIcon />} color="#ef4444" change={billsPaidChange.text} changeType={billsPaidChange.type} />
                 <StatCard title="Inventory Value" value={`$${totalInventoryValue.toFixed(2)}`} icon={<ArchiveIcon />} color="#3b82f6" />
                 <StatCard title="Overdue Bills" value={`${overdueBillsCount}`} icon={<AlertTriangleIcon />} color="#ef4444" />
             </div>
@@ -389,13 +389,13 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card title="Urgent Alerts">
-                    <div className="space-y-3">
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
                         <div className="flex items-start">
                             <PackageWarningIcon className="w-6 h-6 text-yellow-500 mr-3 flex-shrink-0 mt-1" />
                             <div>
                                 <h4 className="font-semibold text-text-primary">Low Stock Items</h4>
                                 {lowStockProducts.length > 0 ? (
-                                    <ul className="list-disc pl-5 text-base text-text-secondary max-h-48 overflow-y-auto">
+                                    <ul className="list-disc pl-5 text-base text-text-secondary">
                                         {lowStockProducts.map(p => (
                                             <li key={p.id}>
                                                 {p.name} - <span className="font-bold text-red-600">{p.stock} left</span>

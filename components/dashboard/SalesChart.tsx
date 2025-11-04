@@ -12,10 +12,12 @@ const SalesChart: React.FC = () => {
     const [timeFrame, setTimeFrame] = useState<TimeFrame>('daily');
     
     const processData = (sales: Sale[], frame: TimeFrame) => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
         // A map to store sales aggregated by day (YYYY-MM-DD). This is the base for all calculations.
         const salesByDate = new Map<string, { cash: number; credit: number }>();
         sales.forEach(sale => {
-            const dateKey = new Date(sale.date).toISOString().split('T')[0];
+            const saleDate = new Date(sale.date);
+            const dateKey = `${saleDate.getFullYear()}-${pad(saleDate.getMonth() + 1)}-${pad(saleDate.getDate())}`;
             if (!salesByDate.has(dateKey)) {
                 salesByDate.set(dateKey, { cash: 0, credit: 0 });
             }
@@ -36,7 +38,7 @@ const SalesChart: React.FC = () => {
             for (let i = 6; i >= 0; i--) {
                 const date = new Date(today);
                 date.setDate(today.getDate() - i);
-                const dateKey = date.toISOString().split('T')[0];
+                const dateKey = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
                 const salesData = salesByDate.get(dateKey) || { cash: 0, credit: 0 };
                 data.push({
                     name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -118,6 +120,23 @@ const SalesChart: React.FC = () => {
     };
 
     const chartData = processData(sales, timeFrame);
+
+    const maxVal = Math.max(...chartData.map(d => d.cash + d.credit), 5000000);
+    const tickInterval = 1000000;
+    const ticks = [];
+    for (let i = tickInterval; i <= maxVal; i += tickInterval) {
+        ticks.push(i);
+    }
+
+    const formatYAxis = (tick: number) => {
+        if (tick >= 1000000) {
+            return `${tick / 1000000}M`;
+        }
+        if (tick >= 1000) {
+            return `${tick / 1000}K`;
+        }
+        return tick;
+    };
     
     return (
         <Card>
@@ -133,10 +152,10 @@ const SalesChart: React.FC = () => {
             </div>
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
-                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} ticks={ticks} domain={[0, 'dataMax']} tickFormatter={formatYAxis} />
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="cash" stackId="a" fill="#10b981" name="Cash Sales" maxBarSize={40} />
@@ -147,5 +166,6 @@ const SalesChart: React.FC = () => {
         </Card>
     );
 };
+
 
 export default SalesChart;

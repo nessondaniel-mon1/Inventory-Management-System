@@ -81,6 +81,10 @@ const Suppliers: React.FC = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [newProductName, setNewProductName] = useState('');
 
+    // State for Unlink Product Confirmation Modal
+    const [isUnlinkProductModalOpen, setIsUnlinkProductModalOpen] = useState(false);
+    const [productToUnlink, setProductToUnlink] = useState<Product | null>(null);
+
     // State for toast notifications
     const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -188,7 +192,7 @@ const Suppliers: React.FC = () => {
         }
     };
 
-    const handleAddSupplier = () => {
+    const handleAddSupplier = async () => {
         const errors: { name?: string, contactPerson?: string, phone?: string } = {};
 
         if (!name.trim()) errors.name = "Supplier name is required.";
@@ -200,7 +204,33 @@ const Suppliers: React.FC = () => {
 
         if (Object.keys(errors).length === 0) {
             const items = itemsSuppliedText.split('\n').filter(item => item.trim() !== '');
-            addSupplier({ name, contactPerson, phone, itemsSupplied: items });
+            const newSupplierRef = await addSupplier({ name, contactPerson, phone, itemsSupplied: items });
+            const newSupplierId = newSupplierRef.id;
+
+            // Process itemsSuppliedText to link/create products
+            for (const itemName of items) {
+                const trimmedItemName = itemName.trim();
+                const existingProduct = products.find(p => p.name.toLowerCase() === trimmedItemName.toLowerCase());
+                if (existingProduct) {
+                    // If product exists and is not already linked to this supplier, link it
+                    if (existingProduct.supplierId !== newSupplierId) {
+                        await updateProductSupplier(existingProduct.id, newSupplierId);
+                    }
+                } else {
+                    // If product does not exist, create a new one and link it
+                    await addProduct({
+                        name: trimmedItemName,
+                        price: 0, // Default price to 0; can be updated on the Products page
+                        stock: 0,
+                        supplierId: newSupplierId,
+                    });
+                }
+            }
+
+            // Clear itemsSupplied from the supplier object after products have been processed
+            await updateSupplier(newSupplierId, { itemsSupplied: [] });
+
+            setToastMessage({ message: `Supplier ${name} added successfully!`, type: 'success' });
             closeAddSupplierModal();
         }
     };
@@ -332,12 +362,30 @@ const Suppliers: React.FC = () => {
         setIsEditModalOpen(false);
     };
 
+    const openUnlinkProductModal = (product: Product) => {
+        setProductToUnlink(product);
+        setIsUnlinkProductModalOpen(true);
+    };
+
+    const closeUnlinkProductModal = () => {
+        setProductToUnlink(null);
+        setIsUnlinkProductModalOpen(false);
+    };
+
     const handleSaveChanges = () => {
         if (editableSupplier) {
             const { id, itemsSupplied, ...detailsToUpdate } = editableSupplier;
             updateSupplier(id, detailsToUpdate);
             setToastMessage({ message: 'Supplier details updated!', type: 'success' });
             closeEditModal();
+        }
+    };
+
+    const handleUnlinkProduct = async () => {
+        if (productToUnlink) {
+            await updateProductSupplier(productToUnlink.id, '');
+            setToastMessage({ message: `${productToUnlink.name} unlinked from supplier.`, type: 'success' });
+            closeUnlinkProductModal();
         }
     };
 
@@ -410,18 +458,18 @@ const Suppliers: React.FC = () => {
                         onChange={e => setSupplierSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="max-h-[500px] overflow-y-auto">
-                    <Table headers={[
+                <Table headers={[
                         { label: 'Name', className: 'w-[250px]' },
                         { label: 'Contact Person', className: 'w-[200px]' },
                         { label: 'Phone', className: 'w-[150px]' },
                         { label: 'Items Supplied' },
                         { label: 'Actions', className: 'text-right w-[210px]' }
-                    ]}>
+                    ]} scrollable={true} maxHeight="500px">
                         {sortedSuppliers.map(s => {
-                            const suppliedProductNames = products
-                                .filter(p => p.supplierId === s.id)
-                                .map(p => p.name);
+                            const suppliedProductNames = [
+                                ...products.filter(p => p.supplierId === s.id).map(p => p.name),
+                                ...s.itemsSupplied.filter(item => !products.some(p => p.supplierId === s.id && p.name === item))
+                            ];
 
                             return (
                                 <tr key={s.id} onClick={() => openEditModal(s)} className="cursor-pointer hover:bg-yellow-100">
@@ -439,7 +487,6 @@ const Suppliers: React.FC = () => {
                             );
                         })}
                     </Table>
-                </div>
             </Card>
 
             <Card title="Recent Supplies">
@@ -472,14 +519,13 @@ const Suppliers: React.FC = () => {
                     </div>
                     {dateSearchError && <p className="text-red-500 text-sm mt-2">{dateSearchError}</p>}
                 </div>
-                <div className="max-h-[600px] overflow-y-auto">
-                    <Table headers={[
+                <Table headers={[
                         { label: 'Date & Time', className: 'w-[200px]' },
                         { label: 'Receipt', className: 'w-[130px]' },
                         { label: 'Supplier', className: 'w-[180px]' },
                         { label: 'Products' },
                         { label: 'Total Cost', className: 'w-[110px] text-right' }
-                    ]}>
+                    ]} scrollable={true} maxHeight="600px">
                         {groupedRecentSupplies.map(group => (
                             <tr key={group.id} className="cursor-pointer hover:bg-yellow-100" onClick={() => openDetailsModal(group)}>
                                 <td className="px-6 py-2 align-top whitespace-nowrap text-base text-text-secondary">{new Date(group.date).toLocaleString()}</td>
@@ -508,7 +554,6 @@ const Suppliers: React.FC = () => {
                             </tr>
                         ))}
                     </Table>
-                </div>
             </Card>
 
             <Modal isOpen={isAddSupplierModalOpen} onClose={closeAddSupplierModal} title="Add New Supplier" footer={
@@ -566,13 +611,10 @@ const Suppliers: React.FC = () => {
 
                     <div className="grid grid-cols-8 gap-4 items-end p-4 bg-slate-50 rounded-lg border">
                         <div className="col-span-4 flex items-end gap-2">
-                             <div className="flex-grow">
-                                <Select label="Product" value={currentProductId} onChange={e => setCurrentProductId(e.target.value)} disabled={supplierProducts.length === 0}>
+                                                               <Select label="Product" value={currentProductId} onChange={e => setCurrentProductId(e.target.value)} disabled={supplierProducts.length === 0}>
                                     <option value="">{supplierProducts.length > 0 ? 'Select a product' : 'No products found'}</option>
                                     {supplierProducts.map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}
-                                </Select>
-                            </div>
-                            <Button variant="ghost" size="sm" onClick={() => setIsAddProductModalOpen(true)}>New</Button>
+                                </Select>                            <Button variant="ghost" size="sm" onClick={() => setIsAddProductModalOpen(true)}>New</Button>
                         </div>
                         <div className="col-span-1"><Input label="Quantity" type="number" value={currentQuantity} onChange={e => setCurrentQuantity(e.target.value)} min="1" disabled={supplierProducts.length === 0} /></div>
                         <div className="col-span-2"><Input label="Unit Cost" type="number" value={currentUnitCost} onChange={e => setCurrentUnitCost(e.target.value)} min="0" placeholder="0.00" disabled={supplierProducts.length === 0} /></div>
@@ -588,7 +630,7 @@ const Suppliers: React.FC = () => {
                         <h4 className="font-semibold text-text-primary">Supply Items</h4>
                         {supplyItems.length === 0 ? <p className="text-base text-center text-text-secondary py-4">No items added yet.</p> :
                         <div className="border rounded-lg overflow-hidden">
-                            <Table headers={['Product', 'Qty', 'Unit Cost', 'Total', '']}>
+                            <Table headers={['Product', 'Qty', 'Unit Cost', 'Total', '']} scrollable={true} maxHeight="200px">
                                 {supplyItems.map(item => (
                                     <tr key={item.productId}>
                                         <td className="px-4 py-2 text-base max-w-[120px] truncate text-gray-900" title={getProductName(item.productId)}>
@@ -648,7 +690,7 @@ const Suppliers: React.FC = () => {
                 isOpen={isEditModalOpen}
                 onClose={closeEditModal}
                 title={`Edit: ${editableSupplier?.name}`}
-                size="3xl"
+                size="2xl"
                 footer={
                     <>
                         <Button onClick={handleSaveChanges}>Save Changes</Button>
@@ -657,7 +699,7 @@ const Suppliers: React.FC = () => {
                 }
             >
                 {editableSupplier && (
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         <div>
                             <h3 className="text-lg font-semibold text-text-primary border-b pb-2 mb-4">Supplier Details</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -681,14 +723,14 @@ const Suppliers: React.FC = () => {
                         
                         <div>
                             <h3 className="text-lg font-semibold text-text-primary border-b pb-2 mb-4">Manage Products</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-3">
                                     <h4 className="font-medium text-text-secondary">Supplied Products ({suppliedProducts.length})</h4>
-                                    <div className="max-h-48 overflow-y-auto border rounded-md p-2 space-y-2 bg-slate-50">
+                                    <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2 bg-slate-50">
                                         {suppliedProducts.length > 0 ? suppliedProducts.map(p => (
-                                            <div key={p.id} className="flex justify-between items-center gap-2 bg-white p-2 rounded shadow-sm hover:bg-yellow-50">
+                                            <div key={p.id} className="flex justify-between items-center gap-2 bg-white py-1 px-2 rounded shadow-sm hover:bg-yellow-50">
                                                 <span className="text-text-primary truncate min-w-0" title={p.name}>{p.name}</span>
-                                                <Button size="sm" variant="danger" className="!p-1.5 flex-shrink-0" onClick={() => updateProductSupplier(p.id, '')}>
+                                                <Button size="sm" variant="danger" className="!p-0.5 flex-shrink-0" onClick={() => openUnlinkProductModal(p)}>
                                                     <TrashIcon className="w-4 h-4" />
                                                 </Button>
                                             </div>
@@ -743,11 +785,18 @@ const Suppliers: React.FC = () => {
                 )}
             </Modal>
 
+            <Modal isOpen={isUnlinkProductModalOpen} onClose={closeUnlinkProductModal} title={`Unlink Product: ${productToUnlink?.name}?`} footer={
+                <><Button variant="danger" onClick={handleUnlinkProduct}>Confirm Unlink</Button><Button variant="ghost" onClick={closeUnlinkProductModal}>Cancel</Button></>
+            }>
+                <p>Are you sure you want to unlink <span className="font-semibold">{productToUnlink?.name}</span> from <span className="font-semibold">{editableSupplier?.name}</span>? This will remove the product from this supplier's list, but the product itself will not be deleted.</p>
+            </Modal>
+
             <Modal
                 isOpen={isDetailsModalOpen}
                 onClose={closeDetailsModal}
                 title={selectedSupplyDetails?.receiptNumber ? `Supply Details - Receipt #${selectedSupplyDetails.receiptNumber}` : 'Supply Details'}
                 size="md"
+                scrollable={true}
                 footer={
                     <>
                         <Button onClick={handlePrintSupplyDetails}>Print Details</Button>

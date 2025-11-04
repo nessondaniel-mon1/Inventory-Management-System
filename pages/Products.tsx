@@ -173,12 +173,12 @@ const Products: React.FC = () => {
                 </div>
                 <div className="max-h-[540px] overflow-y-auto">
                     <Table headers={[
-                        { label: 'Name' },
-                        { label: 'Price', className: 'w-[100px] text-right' },
-                        { label: 'Profit Margin', className: 'w-[120px] text-right' },
-                        { label: 'Stock', className: 'w-[100px] text-right' },
-                        { label: 'Supplier', className: 'w-[250px]' },
-                        { label: 'Actions', className: 'w-[250px] text-right' }
+                        { label: 'Name', className: 'min-w-[150px]' },
+                        { label: 'Price', className: 'min-w-[80px] text-right' },
+                        { label: 'Profit Margin', className: 'min-w-[100px] text-right' },
+                        { label: 'Stock', className: 'min-w-[80px] text-right' },
+                        { label: 'Supplier', className: 'min-w-[150px]' },
+                        { label: 'Actions', className: 'min-w-[180px] text-right' }
                     ]}>
                         {filteredProducts.map(p => {
                             const supplierName = getSupplierName(p.supplierId);
@@ -208,29 +208,29 @@ const Products: React.FC = () => {
 
             <Card title="Recent Stock Updates">
                 <div className="mb-4">
-                    <div className="flex items-center gap-4">
-                        <p className="font-medium text-text-secondary">Search by date:</p>
-                        <div className="grid grid-cols-3 gap-2">
+                    <div className="flex flex-wrap items-center gap-4">
+                        <p className="font-medium text-text-secondary flex-shrink-0">Search by date:</p>
+                        <div className="grid grid-cols-3 gap-2 flex-grow">
                             <Input
                                 placeholder="DD"
                                 value={searchDay}
                                 onChange={e => handleDateSearchChange(e.target.value, setSearchDay)}
                                 maxLength={2}
-                                className="w-[60px] bg-gray-100 text-black border-primary"
+                                className="bg-gray-100 text-black border-primary"
                             />
                             <Input
                                 placeholder="MM"
                                 value={searchMonth}
                                 onChange={e => handleDateSearchChange(e.target.value, setSearchMonth)}
                                 maxLength={2}
-                                className="w-[60px] bg-gray-100 text-black border-primary"
+                                className="bg-gray-100 text-black border-primary"
                             />
                             <Input
                                 placeholder="YYYY"
                                 value={searchYear}
                                 onChange={e => handleDateSearchChange(e.target.value, setSearchYear)}
                                 maxLength={4}
-                                className="w-24 bg-gray-100 text-black border-primary"
+                                className="bg-gray-100 text-black border-primary"
                             />
                         </div>
                     </div>
@@ -238,12 +238,12 @@ const Products: React.FC = () => {
                 </div>
                 <div className="max-h-[600px] overflow-y-auto">
                     <Table headers={[
-                        { label: 'Date', className: 'w-[180px]' },
-                        { label: 'Product' },
-                        { label: 'Supplier', className: 'w-[250px]' },
-                        { label: 'Old Stock', className: 'w-[100px] text-right' },
-                        { label: 'Added', className: 'w-[100px] text-right' },
-                        { label: 'New Stock', className: 'w-[100px] text-right' }
+                        { label: 'Date', className: 'min-w-[150px]' },
+                        { label: 'Product', className: 'min-w-[150px]' },
+                        { label: 'Supplier', className: 'min-w-[150px]' },
+                        { label: 'Old Stock', className: 'min-w-[100px] text-right' },
+                        { label: 'Added', className: 'min-w-[100px] text-right' },
+                        { label: 'New Stock', className: 'min-w-[100px] text-right' }
                     ]}>
                         {recentStockAdditions.map(update => {
                             const product = products.find(p => p.id === update.productId);
@@ -320,7 +320,7 @@ const Products: React.FC = () => {
             </Modal>
             
             {/* Stock History Modal */}
-            <Modal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)} title={`Stock History for ${selectedProduct?.name}`} size="5xl" footer={
+            <Modal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)} title={`Stock History for ${selectedProduct?.name}`} size="4xl" footer={
                 <Button variant="ghost" onClick={() => setIsHistoryModalOpen(false)}>Close</Button>
             }>
                 <div className="max-h-[60vh] overflow-y-auto">

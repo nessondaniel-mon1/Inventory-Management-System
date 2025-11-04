@@ -9,7 +9,6 @@ import Modal from '../components/ui/Modal';
 import Table from '../components/ui/Table';
 import { PrintableReceipt } from '../components/common/PrintableReceipts';
 import Spinner from '../components/ui/Spinner';
-
 const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const MinusIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const TrashIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" y2="17"/><line x1="14" y1="11" y2="17"/></svg>;
@@ -53,6 +52,7 @@ const ItemDiscountModal: React.FC<ItemDiscountModalProps> = ({ isOpen, onClose, 
             onClose={onClose}
             title={`Discount for ${productName}`}
             size="md"
+            scrollable={true}
             footer={
                 <>
                     <Button onClick={handleSave}>Apply Discount</Button>
@@ -98,7 +98,7 @@ const Accounting: React.FC = () => {
     const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'credit' | 'invoice'>('all');
     const [isSaving, setIsSaving] = useState(false);
-    
+
     // Overall cart discount
     const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
     const [discountValue, setDiscountValue] = useState<number | string>('');
@@ -109,6 +109,10 @@ const Accounting: React.FC = () => {
 
     // Per-item discount modal state
     const [itemToDiscount, setItemToDiscount] = useState<CartItem | null>(null);
+
+    // State for remove from cart confirmation modal
+    const [isRemoveFromCartConfirmModalOpen, setIsRemoveFromCartConfirmModalOpen] = useState(false);
+    const [itemToRemoveId, setItemToRemoveId] = useState<string | null>(null);
 
     // This effect syncs the cart with the latest product data (price, stock).
     useEffect(() => {
@@ -145,6 +149,7 @@ const Accounting: React.FC = () => {
     }, [products, productSearch]);
 
     const addToCart = (product: Product) => {
+        console.log('Adding to cart:', product);
         const existingItem = cart.find(item => item.productId === product.id);
         const currentQuantityInCart = existingItem ? Number(existingItem.quantity) : 0;
 
@@ -194,11 +199,27 @@ const Accounting: React.FC = () => {
     };
     
     const handleQuantityBlur = (e: React.FocusEvent<HTMLInputElement>, productId: string) => {
-        if (e.target.value === '' || parseInt(e.target.value, 10) < 1) {
+        if (e.target.value === '') {
             setCart(prev => prev.map(item => item.productId === productId ? { ...item, quantity: 1 } : item));
         }
     };
 
+    const openRemoveFromCartConfirmModal = (productId: string) => {
+        setItemToRemoveId(productId);
+        setIsRemoveFromCartConfirmModalOpen(true);
+    };
+
+    const closeRemoveFromCartConfirmModal = () => {
+        setItemToRemoveId(null);
+        setIsRemoveFromCartConfirmModalOpen(false);
+    };
+
+    const handleConfirmRemoveFromCart = () => {
+        if (itemToRemoveId) {
+            removeFromCart(itemToRemoveId);
+            closeRemoveFromCartConfirmModal();
+        }
+    };
 
     const removeFromCart = (productId: string) => {
         setCart(prev => prev.filter(item => item.productId !== productId));
@@ -279,6 +300,10 @@ const Accounting: React.FC = () => {
     };
 
     const handleSaveSale = async () => {
+        console.log('cart', cart);
+        console.log('paymentStatus', paymentStatus);
+        console.log('selectedCustomer', selectedCustomer);
+        console.log('invoiceNumber', invoiceNumber);
         if (cart.length === 0) {
             setToastMessage({ message: "The cart is empty.", type: 'error' });
             return;
@@ -341,7 +366,7 @@ const Accounting: React.FC = () => {
             setTaxValue('');
         } catch (error) {
             console.error("Failed to save sale:", error);
-            setToastMessage({ message: "An error occurred while saving the sale. Please try again.", type: 'error' });
+            setToastMessage({ message: "Failed to save sale. Please try again.", type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -363,13 +388,13 @@ const Accounting: React.FC = () => {
     const dailySalesHistory = useMemo(() => {
         const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        let filteredSales = sales.filter(sale => new Date(sale.date) >= todayStart);
+        let filteredSales = sales.filter(sale => new Date(sale.date) >= todayStart && currentUser && sale.employeeId === currentUser.id);
 
         if (statusFilter !== 'all') {
             filteredSales = filteredSales.filter(sale => sale.paymentStatus === statusFilter);
         }
 
-        return filteredSales;
+        return filteredSales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [sales, statusFilter]);
 
     return (
@@ -413,16 +438,16 @@ const Accounting: React.FC = () => {
                                  const quantityExceedsStock = Number(item.quantity) > product.stock;
 
                                  return (
-                                    <div key={item.productId} className="grid grid-cols-[1fr_auto] items-center px-2 py-1 border-b border-border gap-4">
+                                    <div key={item.productId} className="grid grid-cols-[1fr_auto] items-center px-2 py-1 border-b border-border gap-2">
                                        <div className="min-w-0">
                                             <p className="font-semibold truncate" title={getProductName(item.productId)}>{getProductName(item.productId)}</p>
                                             <p className="text-sm text-text-secondary">${item.salePrice.toFixed(2)} (Stock: {product.stock})</p>
                                             {quantityExceedsStock && <p className="text-xs text-red-500">Not enough stock!</p>}
                                         </div>
-                                       <div className="flex items-center gap-2">
-                                            <button type="button" onClick={() => updateQuantity(item.productId, -1)} className="p-1 rounded-full text-gray-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                       <div className="flex items-center flex-wrap gap-2">
+                                            <span onClick={() => updateQuantity(item.productId, -1)} className="cursor-pointer text-gray-500 hover:text-primary w-8 h-8 flex items-center justify-center">
                                                 <MinusIcon className="w-4 h-4" />
-                                            </button>
+                                            </span>
                                            <input
                                                 type="number"
                                                 className={`w-16 text-center font-semibold border rounded-md py-1 bg-white ${quantityExceedsStock ? 'border-red-500' : 'border-border'}`}
@@ -433,16 +458,16 @@ const Accounting: React.FC = () => {
                                                 max={product.stock}
                                                 aria-label={`Quantity for ${getProductName(item.productId)}`}
                                             />
-                                           <button type="button" onClick={() => updateQuantity(item.productId, 1)} className="p-1 rounded-full text-gray-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled={Number(item.quantity) >= product.stock}>
+                                           <span onClick={() => updateQuantity(item.productId, 1)} className="cursor-pointer text-gray-500 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed w-8 h-8 flex items-center justify-center" disabled={Number(item.quantity) >= product.stock}>
                                                 <PlusIcon className="w-4 h-4" />
-                                            </button>
-                                            <span className="w-20 text-right font-bold">${((Number(item.quantity) || 0) * item.salePrice).toFixed(2)}</span>
-                                            <button type="button" onClick={() => setItemToDiscount(item)} className={`p-2 rounded-full hover:bg-yellow-100 ${hasDiscount ? 'text-secondary' : 'text-gray-500'}`} aria-label="Add item discount">
-                                                <TagIcon className="w-5 h-5" />
-                                            </button>
-                                            <button type="button" onClick={() => removeFromCart(item.productId)} className="p-2 rounded-full text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" aria-label="Remove item">
-                                                <TrashIcon className="w-5 h-5" />
-                                            </button>
+                                            </span>
+                                            <span className="w-24 text-right font-bold">${((Number(item.quantity) || 0) * item.salePrice).toFixed(2)}</span>
+                                            <span onClick={() => setItemToDiscount(item)} className={`cursor-pointer hover:text-primary w-8 h-8 flex items-center justify-center ${hasDiscount ? 'text-secondary' : 'text-gray-500'}`} aria-label="Add item discount">
+                                                <TagIcon className="w-4 h-4" />
+                                            </span>
+                                            <span onClick={() => openRemoveFromCartConfirmModal(item.productId)} className="cursor-pointer text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center" aria-label="Remove item">
+                                                <TrashIcon className="w-4 h-4" />
+                                            </span>
                                        </div>
                                     </div>
                                  );
@@ -452,25 +477,37 @@ const Accounting: React.FC = () => {
                 </div>
                 <div className="lg:col-span-2">
                     <Card title="Payment Details">
-                        <div className="space-y-4">
-                            <Select label="Payment Method" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}>
-                                <option value="cash">Cash</option>
-                                <option value="mobile">Mobile Payment</option>
-                                <option value="card">Card</option>
-                            </Select>
-                            <Select label="Payment Status" value={paymentStatus} onChange={e => setPaymentStatus(e.target.value as PaymentStatus)}>
-                                <option value="paid">Paid</option>
-                                <option value="credit">Credit</option>
-                                <option value="invoice">Invoice</option>
-                            </Select>
+                        <div className="space-y-1">
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Select label="Payment Method" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}>
+                                        <option value="cash">Cash</option>
+                                        <option value="mobile">Mobile Payment</option>
+                                        <option value="card">Card</option>
+                                    </Select>
+                                </div>
+                                <div className="flex-1">
+                                    <Select label="Payment Status" value={paymentStatus} onChange={e => setPaymentStatus(e.target.value as PaymentStatus)}>
+                                        <option value="paid">Paid</option>
+                                        <option value="credit">Credit</option>
+                                        <option value="invoice">Invoice</option>
+                                    </Select>
+                                </div>
+                            </div>
                             {(paymentStatus === 'credit' || paymentStatus === 'invoice') && (
-                                <Select label="Customer" value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)}>
-                                    <option value="">Select Customer</option>
-                                    {customers.filter(c => c.type === paymentStatus).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                </Select>
-                            )}
-                            {paymentStatus === 'invoice' && (
-                                <Input label="Invoice Number" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                                <div className="flex gap-2">
+                                    <div className="flex-1">
+                                        <Select label="Customer" value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)}>
+                                            <option value="">Select Customer</option>
+                                            {customers.filter(c => c.type === paymentStatus).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </Select>
+                                    </div>
+                                    {paymentStatus === 'invoice' && (
+                                        <div className="flex-1">
+                                            <Input label="Invoice Number" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                                        </div>
+                                    )}
+                                </div>
                             )}
                             <div className="flex gap-2">
                                 <div className="w-1/3">
@@ -506,7 +543,7 @@ const Accounting: React.FC = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="pt-4 border-t border-border space-y-2 text-lg">
+                            <div className="pt-2 border-t border-border space-y-1 text-lg">
                                 <div className="flex justify-between items-center text-text-secondary">
                                     <span>Subtotal:</span>
                                     <span>${subtotal.toFixed(2)}</span>
@@ -541,7 +578,10 @@ const Accounting: React.FC = () => {
                             <Button 
                                 size="lg" 
                                 className="w-full" 
-                                onClick={handleSaveSale} 
+                                onClick={() => {
+                                    console.log('Save Sale button clicked');
+                                    handleSaveSale();
+                                }} 
                                 disabled={
                                     isSaving ||
                                     cart.length === 0 || 
@@ -572,17 +612,16 @@ const Accounting: React.FC = () => {
                     </div>
                 }
             >
-                 <div className="max-h-[550px] overflow-y-auto">
-                     <Table headers={[
-                        { label: 'Receipt', className: 'w-48' },
-                        { label: 'Date', className: 'w-32' },
-                        { label: 'Customer', className: 'w-40' },
-                        { label: 'Employee', className: 'w-40' },
-                        { label: 'Products', className: 'w-auto' },
-                        { label: 'Total', className: 'w-28 text-right' },
-                        { label: 'Method', className: 'w-28' },
-                        { label: 'Status', className: 'w-28' }
-                     ]}>
+                 <Table headers={[
+                        { label: 'Receipt', className: 'min-w-[100px]' },
+                        { label: 'Date', className: 'min-w-[100px]' },
+                        { label: 'Customer', className: 'min-w-[120px]' },
+                        { label: 'Employee', className: 'min-w-[120px]' },
+                        { label: 'Products', className: 'min-w-[200px]' },
+                        { label: 'Total', className: 'min-w-[100px] text-right' },
+                        { label: 'Method', className: 'min-w-[100px]' },
+                        { label: 'Status', className: 'min-w-[100px]' }
+                     ]} scrollable={true} maxHeight="550px">
                         {dailySalesHistory.map(sale => {
                             const receiptText = sale.paymentStatus === 'invoice' && sale.invoiceDetails?.invoiceNumber
                                 ? `${sale.receiptNumber} / ${sale.invoiceDetails.invoiceNumber}`
@@ -601,7 +640,7 @@ const Accounting: React.FC = () => {
                                         <div className="space-y-1">
                                             {sale.items.map(item => (
                                                 <div key={item.productId} className="flex justify-between items-center gap-2">
-                                                    <span className="truncate min-w-0" title={getProductName(item.productId)}>
+                                                    <span className="truncate max-w-[150px]" title={getProductName(item.productId)}>
                                                         {getProductName(item.productId)}
                                                     </span>
                                                     <span className="flex-shrink-0 whitespace-nowrap">
@@ -626,7 +665,6 @@ const Accounting: React.FC = () => {
                             );
                         })}
                     </Table>
-                </div>
             </Card>
              {saleToPrint && (
                 <Modal 
@@ -634,6 +672,7 @@ const Accounting: React.FC = () => {
                     onClose={() => setSaleToPrint(null)} 
                     title={`Receipt #${saleToPrint.receiptNumber}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrint}>Print Receipt</Button>
@@ -653,6 +692,21 @@ const Accounting: React.FC = () => {
                     onSave={handleSaveItemDiscount}
                 />
             )}
+
+            <Modal
+                isOpen={isRemoveFromCartConfirmModalOpen}
+                onClose={closeRemoveFromCartConfirmModal}
+                title="Remove Item from Cart?"
+                size="sm"
+                footer={
+                    <>
+                        <Button variant="danger" onClick={handleConfirmRemoveFromCart}>Remove</Button>
+                        <Button variant="ghost" onClick={closeRemoveFromCartConfirmModal}>Cancel</Button>
+                    </>
+                }
+            >
+                <p>Are you sure you want to remove <span className="font-semibold">{getProductName(itemToRemoveId || '')}</span> from the cart?</p>
+            </Modal>
         </div>
     );
 };

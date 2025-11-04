@@ -1,19 +1,33 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 
 interface ModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title: string;
     children: React.ReactNode;
-    footer?: React.ReactNode;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+    className?: string;
+    title?: string;
+    action?: React.ReactNode;
+    contentClassName?: string; // New prop
 }
 
 const CloseIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer, size = '2xl' }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer, size = '2xl', scrollable = false }) => {
+    console.log('Modal rendered, isOpen:', isOpen);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = ''; // Reset to default
+        }
+
+        // Cleanup function to ensure overflow is reset when component unmounts or isOpen changes
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]); // Re-run effect when isOpen changes
+
     if (!isOpen) return null;
 
     const sizeClasses = {
@@ -27,6 +41,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer,
         '5xl': 'max-w-5xl',
     };
 
+    const contentClasses = scrollable ? "p-6 space-y-6 max-h-[70vh] overflow-y-auto" : "p-6 space-y-6";
+
     return (
        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className={`relative bg-card rounded-lg shadow-xl w-full mx-auto transform transition-all ${sizeClasses[size]}`}>
@@ -39,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer,
                         <span className="sr-only">Close modal</span>
                     </button>
                 </div>
-                <div className="p-6 space-y-6">
+                <div className={contentClasses}>
                     {children}
                 </div>
                 {footer && (

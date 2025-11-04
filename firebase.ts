@@ -6,13 +6,14 @@ import 'firebase/compat/auth';
 
 // TODO: Add your own Firebase configuration from your Firebase project settings
 const firebaseConfig = {
-  apiKey: "AIzaSyBEYt04rq-fkBmEuU7C5RWzAzDEq33KGpQ",
-  authDomain: "ad-inventory-manager.firebaseapp.com",
-  projectId: "ad-inventory-manager",
-  storageBucket: "ad-inventory-manager.firebasestorage.app",
-  messagingSenderId: "263895413323",
-  appId: "1:263895413323:web:52137d440b3458b4be53ce",
-  measurementId: "G-822KTTHXMX"
+  apiKey: "AIzaSyBFMd7oZpX47QjeYsKd1A1-gTKVHmIvnBc",
+  authDomain: "ad-inventory-pro-n5.firebaseapp.com",
+  projectId: "ad-inventory-pro-n5",
+  storageBucket: "ad-inventory-pro-n5.firebasestorage.app",
+  messagingSenderId: "647173379188",
+  appId: "1:647173379188:web:dc62894e192c3542bb2d21",
+  measurementId: "G-V3VKNRPGTJ"
+
 };
 
 // Initialize Firebase

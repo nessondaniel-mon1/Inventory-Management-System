@@ -12,6 +12,16 @@ import Spinner from '../components/ui/Spinner';
 
 const Account: React.FC = () => {
     const { currentUser, users, addUser, deleteUser, receiptSettings, updateReceiptSettings, updateUser, updateAdminDetails } = useInventory();
+    const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+    useEffect(() => {
+        if (toastMessage) {
+            const timer = setTimeout(() => {
+                setToastMessage(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toastMessage]);
     
     // Filter out the current user from the list of employees to manage
     const employeeList = users.filter(e => e.id !== currentUser?.id);
@@ -185,10 +195,10 @@ const Account: React.FC = () => {
     const handleSaveReceiptSettings = async () => {
         try {
             await updateReceiptSettings(localReceiptSettings);
-            alert("Receipt settings saved!");
+            setToastMessage({ message: "Receipt settings saved successfully!", type: 'success' });
         } catch(error) {
             console.error("Failed to save receipt settings:", error);
-            alert("Could not save settings.");
+            setToastMessage({ message: "Failed to save receipt settings. Please try again.", type: 'error' });
         }
     };
     
@@ -196,6 +206,14 @@ const Account: React.FC = () => {
 
     return (
         <div className="space-y-6">
+             {toastMessage && (
+                <div 
+                    className={`fixed top-5 right-5 z-[100] p-4 rounded-lg shadow-lg text-white ${toastMessage.type === 'success' ? 'bg-secondary' : 'bg-red-600'}`}
+                    role="alert"
+                >
+                    {toastMessage.message}
+                </div>
+            )}
             <Card title="Your Account Details">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Input label="Username" value={adminName} onChange={e => setAdminName(e.target.value)} />
@@ -247,7 +265,7 @@ const Account: React.FC = () => {
 
             {currentUser.permissions.canManageEmployees && (
                 <Card title="Manage Employees" action={<Button onClick={() => setIsAddModalOpen(true)}>Add Employee</Button>}>
-                    <Table headers={['Username', 'Email', 'Role', { label: 'Actions', className: 'text-right' }]}>
+                    <Table headers={['Username', 'Email', 'Role', { label: 'Actions', className: 'text-right' }]} scrollable={true} maxHeight="400px">
                         {employeeList.map(emp => (
                             <tr key={emp.id}>
                                 <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary">{emp.name}</td>

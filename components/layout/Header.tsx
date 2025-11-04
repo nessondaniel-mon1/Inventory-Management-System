@@ -6,6 +6,8 @@ import { useInventory } from '../../hooks/useInventory';
 interface HeaderProps {
     currentPage: Page;
     setCurrentPage: (page: Page) => void;
+    className?: string;
+    toggleSidebar: () => void; // New prop
 }
 
 // Icons
@@ -18,7 +20,16 @@ const ReceiptIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xm
 const FileTextIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>;
 const CompassIcon = (props: React.SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>;
 
-const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
+// Hamburger Icon
+const MenuIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="6" x2="20" y2="6" />
+        <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+);
+
+const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className, toggleSidebar }) => {
     const { currentUser, users, products, customers, suppliers, sales, bills, getCustomerName } = useInventory();
 
     // Search state
@@ -104,9 +115,18 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
     const hasResults = searchResults.products.length > 0 || searchResults.customers.length > 0 || searchResults.suppliers.length > 0 || searchResults.sales.length > 0 || searchResults.bills.length > 0 || searchResults.users.length > 0 || searchResults.pages.length > 0;
 
     return (
-        <header className="h-20 bg-card border-b border-border flex items-center justify-between px-6">
-            <h1 className="text-3xl font-bold text-text-primary">{pageTitle}</h1>
-            <div className="flex items-center space-x-4">
+        <header className={`h-20 bg-card border-b border-border flex items-center justify-between px-6 ${className}`}>
+            <div className="flex items-center"> {/* New div to group hamburger and title */}
+                <button
+                    onClick={toggleSidebar}
+                    className="lg:hidden mr-4 text-gray-500 hover:text-primary focus:outline-none"
+                    aria-label="Toggle sidebar"
+                >
+                    <MenuIcon className="h-6 w-6" />
+                </button>
+                <h1 className="text-3xl font-bold text-text-primary truncate min-w-0 flex-grow">{pageTitle}</h1>
+            </div>
+            <div className="flex items-center space-x-4 flex-shrink-0">
                 <div ref={searchContainerRef} className="relative">
                     <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input

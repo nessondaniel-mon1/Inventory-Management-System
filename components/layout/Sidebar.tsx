@@ -6,6 +6,9 @@ import { useInventory } from '../../hooks/useInventory';
 interface SidebarProps {
     currentPage: Page;
     setCurrentPage: (page: Page) => void;
+    className?: string;
+    isSidebarOpen: boolean; // New prop
+    toggleSidebar: () => void; // New prop
 }
 
 const LogOutIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -17,13 +20,21 @@ const GemIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, className, isSidebarOpen, toggleSidebar }) => {
     const { currentUser, logout } = useInventory();
     
     const accessibleNavItems = NAV_ITEMS.filter(item => currentUser?.permissions[item.id]);
 
     return (
-        <aside className="w-64 bg-sidebar text-white flex flex-col">
+        <aside
+            className={`
+                w-64 bg-sidebar text-white flex-col z-50
+                ${isSidebarOpen ? 'fixed inset-y-0 left-0 flex' : 'hidden'}
+                lg:flex lg:relative lg:translate-x-0
+                transition-transform duration-300 ease-in-out
+                ${className}
+            `}
+        >
             <div className="h-20 flex items-center justify-center border-b border-slate-700">
                 <GemIcon className="h-8 w-8 text-indigo-400" />
                 <h1 className="text-2xl font-bold ml-2">Inventory Pro</h1>
@@ -37,6 +48,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage }) => {
                                 onClick={(e) => {
                                     e.preventDefault();
                                     setCurrentPage(item.id);
+                                    if (isSidebarOpen) { // Close sidebar on navigation for small screens
+                                        toggleSidebar();
+                                    }
                                 }}
                                 className={`flex items-center p-3 rounded-lg transition-colors ${
                                     currentPage === item.id 
@@ -57,6 +71,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage }) => {
                     onClick={(e) => {
                         e.preventDefault();
                         logout();
+                        if (isSidebarOpen) { // Close sidebar on logout for small screens
+                            toggleSidebar();
+                        }
                     }}
                     className="flex items-center p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
                 >

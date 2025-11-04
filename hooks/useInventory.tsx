@@ -333,11 +333,12 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({ children }
         const profit = totalBeforeTax - totalCost; // Profit is calculated on the pre-tax amount
 
         // 6. Generate receipt number
-        // FIX: Replaced v9 `query(collection(...), where(...))` with v8 `db.collection(...).where(...)`.
-        const salesTodayQuery = db.collection('sales').where('date', '>=', new Date(new Date().setHours(0,0,0,0)));
-        // FIX: Replaced v9 `getDocs(...)` with v8 `query.get()`.
-        const salesTodaySnapshot = await salesTodayQuery.get();
-        const todayCount = salesTodaySnapshot.size;
+        // OPTIMIZATION: Instead of querying Firestore for all of today's sales to generate a receipt number,
+        // which is slow and costly, we now use the in-memory `sales` array that is already synced in real-time.
+        // This avoids a network round-trip and significantly speeds up the sale creation process.
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayCount = sales.filter(s => new Date(s.date) >= todayStart).length;
         
         const pad = (num: number) => num.toString().padStart(2, '0');
         const now = new Date();
@@ -351,7 +352,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({ children }
             total: finalTotal, 
             totalCost, 
             profit, 
-            tax: taxDetails, 
+            ...(taxDetails && { tax: taxDetails }), 
             date: serverTimestamp(), 
             receiptNumber: newReceiptNumber 
         };

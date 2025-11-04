@@ -118,7 +118,7 @@ const Payments: React.FC = () => {
     }, [bills, billFilter]);
 
     const recentPayments = useMemo(() => {
-        const sorted = [...payments].sort((a, b) => new Date(b.date).getTime() - new Date(b.date).getTime());
+        const sorted = [...payments].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         const lowercasedFilter = historySearchTerm.toLowerCase();
         const hasTextSearch = historySearchTerm.trim() !== '';
         const hasDateSearch = searchDay || searchMonth || searchYear;
@@ -451,7 +451,7 @@ const Payments: React.FC = () => {
                     <div className="max-h-[500px] overflow-y-auto">
                         {activeReceiveTab === 'invoices' ? (
                             <>
-                                <Table headers={[{label: 'Invoice #'}, {label: 'Customer'}, {label: 'Amount'}, {label: 'Action', className: 'text-right w-48'}]}>
+                                <Table headers={[{label: 'Invoice No.'}, {label: 'Customer'}, {label: 'Amount'}, {label: 'Action', className: 'text-right w-48'}]} scrollable={true} maxHeight="500px">
                                     {unpaidInvoices.map(invoice => (
                                         <tr key={invoice.id} className="hover:bg-yellow-100">
                                             <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-primary">
@@ -473,7 +473,7 @@ const Payments: React.FC = () => {
                             </>
                         ) : (
                              <>
-                                <Table headers={[{label: 'Customer'}, { label: 'Balance', className: 'w-32' }, { label: 'Action', className: 'text-right w-48' }]}>
+                                <Table headers={[{label: 'Customer'}, { label: 'Balance', className: 'w-32' }, { label: 'Action', className: 'text-right w-48' }]} scrollable={true} maxHeight="500px">
                                     {customersWithCreditBalance.map(c => (
                                         <tr key={c.id} className="hover:bg-yellow-100">
                                             <td className="px-6 py-2 text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
@@ -503,18 +503,24 @@ const Payments: React.FC = () => {
                     </div>
                 }>
                     <div className="max-h-[500px] overflow-y-auto">
-                         <Table headers={[{ label: 'Vendor', className: 'w-[160px]' }, 'Due Date', 'Amount', { label: 'Status', className: 'w-24' }, { label: 'Action', className: 'text-right' }]}>
+                         <Table headers={[
+                            { label: 'Vendor', className: 'w-48' },
+                            { label: 'Due Date', className: 'w-32' },
+                            { label: 'Amount', className: 'w-32' },
+                            { label: 'Status', className: 'w-28' },
+                            { label: 'Action', className: 'w-32 text-right' }
+                         ]} scrollable={true} maxHeight="500px">
                              {sortedBills.map(b => {
                                  const isOverdue = b.status === 'unpaid' && new Date(b.dueDate) < new Date();
                                  return (
                                     <tr key={b.id} className={`${getBillRowClass(b)} cursor-pointer`} onClick={() => openDetailsModal(b)}>
                                         <td className="px-6 py-2 text-base font-medium text-text-primary">
                                             <div className="flex items-center">
-                                                <span className="truncate" title={b.vendor}>{b.vendor}</span>
+                                                <span className="truncate max-w-[150px]" title={b.vendor}>{b.vendor}</span>
                                                 {b.isRecurring && <RepeatIcon className="w-4 h-4 ml-2 text-blue-500 flex-shrink-0" title="Recurring Bill"/>}
                                             </div>
                                         </td>
-                                        <td className={`px-6 py-2 whitespace-nowrap text-base ${isOverdue ? 'text-red-500 font-semibold' : 'text-text-secondary'}`}>
+                                        <td className={`px-6 py-2 whitespace-nowrap text-base truncate max-w-[120px] ${isOverdue ? 'text-red-500 font-semibold' : 'text-text-secondary'}`}>
                                             {new Date(b.dueDate).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary">${b.amount.toFixed(2)}</td>
@@ -606,11 +612,11 @@ const Payments: React.FC = () => {
                             { label: 'Receipt No.', className: 'w-40' },
                             { label: 'Date', className: 'w-48' },
                             { label: 'Employee', className: 'w-40' },
-                            'Customer',
+                            { label: 'Customer', className: 'w-48' },
                             { label: 'Type', className: 'w-24 text-center' },
                             { label: 'Amount', className: 'w-32 text-right' },
                             { label: 'Remaining Balance', className: 'w-48 text-right' }
-                        ]}>
+                        ]} scrollable={true} maxHeight="500px">
                             {recentPayments.map(p => {
                                 const isOutbound = p.type === 'outbound_bill';
                                 let customerOrVendorName = '';
@@ -646,10 +652,10 @@ const Payments: React.FC = () => {
                                         onClick={() => openReceiptForPayment(p)}
                                         className={p.type === 'inbound_customer' ? 'cursor-pointer hover:bg-yellow-100' : ''}
                                     >
-                                        <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-primary">{p.id}</td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{new Date(p.date).toLocaleString()}</td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{getEmployeeName(p.employeeId)}</td>
-                                        <td className="px-6 py-2 text-base font-medium text-text-primary truncate" title={customerOrVendorName}>{customerOrVendorName}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-primary truncate max-w-[150px]" title={p.id}>{p.id}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-[180px]" title={new Date(p.date).toLocaleString()}>{new Date(p.date).toLocaleString()}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-[150px]" title={getEmployeeName(p.employeeId)}>{getEmployeeName(p.employeeId)}</td>
+                                        <td className="px-6 py-2 text-base font-medium text-text-primary truncate max-w-[180px]" title={customerOrVendorName}>{customerOrVendorName}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base text-center">
                                             <span className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${typeClassName}`}>
                                                 {typeText}
@@ -666,7 +672,7 @@ const Payments: React.FC = () => {
                             })}
                         </Table>
                     ) : (
-                        <Table headers={['Date Paid', 'Employee', { label: 'Vendor', className: 'max-w-sm' }, { label: 'Description', className: 'max-w-md' }, { label: 'Category', className: 'w-28' }, { label: 'Amount', className: 'text-right' }]}>
+                        <Table headers={['Date Paid', 'Employee', { label: 'Vendor', className: 'max-w-sm' }, { label: 'Description', className: 'max-w-md' }, { label: 'Category', className: 'w-28' }, { label: 'Amount', className: 'text-right' }]} scrollable={true} maxHeight="500px">
                             {paidBillsHistory.map(b => (
                                 <tr key={b.id} className="cursor-pointer hover:bg-yellow-100" onClick={() => setBillForReceipt(b)}>
                                     <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{new Date(b.paidDate).toLocaleDateString()}</td>
@@ -718,7 +724,7 @@ const Payments: React.FC = () => {
              <Modal
                 isOpen={isInvoiceModalOpen}
                 onClose={closeInvoiceModal}
-                title={`Payment for Invoice #${selectedInvoice?.invoiceDetails?.invoiceNumber || selectedInvoice?.receiptNumber}`}
+                title={`Payment for Invoice No. ${selectedInvoice?.invoiceDetails?.invoiceNumber || selectedInvoice?.receiptNumber}`}
                 footer={<><Button onClick={handleReceiveInvoicePayment} disabled={!receivingEmployeeId}>Confirm Payment</Button><Button variant="ghost" onClick={closeInvoiceModal}>Cancel</Button></>}
             >
                 <div className="space-y-4">
@@ -783,9 +789,10 @@ const Payments: React.FC = () => {
                 onClose={closeDetailsModal}
                 title="Bill Details"
                 footer={<Button variant="ghost" onClick={closeDetailsModal}>Close</Button>}
+                scrollable
             >
                 {billForDetails && (
-                    <div className="space-y-4">
+                <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 p-4 bg-slate-50 rounded-lg border">
                             <div>
                                 <p className="text-sm font-medium text-text-secondary">Vendor</p>
@@ -832,8 +839,9 @@ const Payments: React.FC = () => {
                 onClose={closeAddBillModal}
                 title="Add New Bill or Expense"
                 footer={<><Button onClick={handleAddBill}>Save Bill</Button><Button variant="ghost" onClick={closeAddBillModal}>Cancel</Button></>}
+                scrollable
             >
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                     <Input 
                         ref={vendorInputRef}
                         label="Vendor / Payee" 
@@ -947,6 +955,7 @@ const Payments: React.FC = () => {
                     onClose={() => setReceiptDetails(null)} 
                     title={`Receipt #${receiptDetails.payment.id}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrintReceipt}>Print Receipt</Button>
@@ -965,6 +974,7 @@ const Payments: React.FC = () => {
                     onClose={() => setBillForReceipt(null)}
                     title={`Receipt for ${billForReceipt.vendor}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrintBillReceipt}>Print Receipt</Button>

@@ -136,7 +136,7 @@ const Sales: React.FC = () => {
             const matchesEmployee = selectedEmployeeId === 'all' || sale.employeeId === selectedEmployeeId;
 
             return matchesText && matchesDate && matchesStatus && matchesEmployee;
-        });
+        }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [sales, searchTerm, getEmployeeName, getCustomerName, selectedDate, statusFilter, selectedEmployeeId]);
     
     const recentPayments = useMemo(() => {
@@ -403,17 +403,16 @@ const Sales: React.FC = () => {
                                 </Button>
                             ))}
                         </div>
-                        <div className="max-h-[550px] overflow-y-auto">
-                            <Table headers={[
+                        <Table headers={[
                                 { label: 'Receipt', className: 'w-40' },
-                                { label: 'Time', className: 'w-32' },
-                                { label: 'Employee', className: 'w-36' },
-                                { label: 'Customer', className: 'w-36' },
-                                { label: 'Items', className: 'w-1/3' },
-                                { label: 'Total', className: 'w-28 text-right' },
-                                { label: 'Profit', className: 'w-28 text-right' },
+                                { label: 'Date', className: 'w-32' },
+                                { label: 'Customer', className: 'w-32' },
+                                { label: 'Employee', className: 'w-32' },
+                                { label: 'Products', className: 'w-96' },
+                                { label: 'Total', className: 'w-32 text-right' },
+                                { label: 'Method', className: 'w-28' },
                                 { label: 'Status', className: 'w-28' }
-                            ]}>
+                            ]} scrollable={true} maxHeight="550px">
                                 {filteredSales.map(sale => {
                                     const receiptText = sale.paymentStatus === 'invoice' && sale.invoiceDetails?.invoiceNumber
                                         ? `${sale.receiptNumber} / ${sale.invoiceDetails.invoiceNumber}`
@@ -427,17 +426,13 @@ const Sales: React.FC = () => {
                                                 {receiptText}
                                             </td>
                                             <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{new Date(sale.date).toLocaleTimeString()}</td>
-                                            <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate" title={employeeName}>
-                                                {employeeName}
-                                            </td>
-                                            <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate" title={customerName}>
-                                                {customerName}
-                                            </td>
+                                            <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate" title={customerName}>{customerName}</td>
+                                            <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate" title={employeeName}>{employeeName}</td>
                                             <td className="px-6 py-2 text-base text-text-secondary">
                                                 <div className="space-y-1">
                                                     {sale.items.map(item => (
                                                         <div key={item.productId} className="flex justify-between items-center gap-2">
-                                                            <span className="truncate min-w-0" title={getProductName(item.productId)}>
+                                                            <span className="truncate max-w-[150px]" title={getProductName(item.productId)}>
                                                                 {getProductName(item.productId)}
                                                             </span>
                                                             <span className="flex-shrink-0 whitespace-nowrap">
@@ -448,7 +443,7 @@ const Sales: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary text-right">${sale.total.toFixed(2)}</td>
-                                            <td className={`px-6 py-2 whitespace-nowrap text-base font-semibold text-right ${sale.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>${sale.profit.toFixed(2)}</td>
+                                            <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary capitalize">{sale.paymentMethod}</td>
                                             <td className="px-6 py-2 whitespace-nowrap text-base">
                                                 <span className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${
                                                     sale.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
@@ -463,7 +458,6 @@ const Sales: React.FC = () => {
                                 })}
                             </Table>
                              {filteredSales.length === 0 && <p className="text-center text-text-secondary py-8">No sales found for this day.</p>}
-                        </div>
                     </>
                 )}
                 
@@ -482,8 +476,7 @@ const Sales: React.FC = () => {
                                 </Button>
                             ))}
                         </div>
-                        <div className="max-h-[550px] overflow-y-auto">
-                            <Table headers={['Receipt No.', 'Time', 'Employee', 'Customer', 'Type', 'Amount', 'Balance']}>
+                        <Table headers={['Receipt No.', 'Time', 'Employee', 'Customer', 'Type', 'Amount', 'Balance']} scrollable={true} maxHeight="550px">
                                 {recentPayments.map(p => {
                                     const customerName = getCustomerName(p.referenceId);
                                     const type = p.description.startsWith('Payment for Invoice') ? 'Invoice' : 'Credit';
@@ -501,28 +494,38 @@ const Sales: React.FC = () => {
                                 })}
                             </Table>
                             {recentPayments.length === 0 && <p className="text-center text-text-secondary py-8">No payments found for this day.</p>}
-                        </div>
-                    </>
+                        </>
                 )}
 
-                {activeTab === 'bills' && (
-                     <div className="max-h-[550px] overflow-y-auto">
-                        <Table headers={['Time Paid', 'Employee', 'Vendor', 'Description', 'Category', 'Amount']}>
-                            {paidBillsHistory.map(b => (
-                                <tr key={b.id} className="cursor-pointer hover:bg-yellow-100" onClick={() => setBillForReceipt(b)}>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{new Date(b.paidDate).toLocaleTimeString()}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{b.employeeId ? getEmployeeName(b.employeeId) : 'N/A'}</td>
-                                    <td className="px-6 py-2 text-base font-medium text-text-primary max-w-sm truncate" title={b.vendor}>{b.vendor}</td>
-                                    <td className="px-6 py-2 text-base text-text-secondary max-w-md truncate" title={b.description}>{b.description}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{b.category}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-right text-text-primary">${b.amount.toFixed(2)}</td>
-                                </tr>
-                            ))}
-                        </Table>
-                        {paidBillsHistory.length === 0 && <p className="text-center text-text-secondary py-8">No bills were paid on this day.</p>}
-                    </div>
-                )}
-            </Card>
+                                {activeTab === 'bills' && (
+                                     <>
+                                        <Table headers={['Time Paid', 'Employee', 'Vendor', 'Description', 'Category', 'Amount']} scrollable={true} maxHeight="550px">
+                                            <thead>
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Paid</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paidBillsHistory.map(b => (
+                                                    <tr key={b.id} className="cursor-pointer hover:bg-yellow-100" onClick={() => setBillForReceipt(b)}>
+                                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{new Date(b.paidDate).toLocaleTimeString()}</td>
+                                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{b.employeeId ? getEmployeeName(b.employeeId) : 'N/A'}</td>
+                                                        <td className="px-6 py-2 text-base font-medium text-text-primary max-w-sm truncate" title={b.vendor}>{b.vendor}</td>
+                                                        <td className="px-6 py-2 text-base text-text-secondary max-w-md truncate" title={b.description}>{b.description}</td>
+                                                        <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{b.category}</td>
+                                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-right text-text-primary">${b.amount.toFixed(2)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                        {paidBillsHistory.length === 0 && <p className="text-center text-text-secondary py-8">No bills were paid on this day.</p>}
+                                    </>
+                                )}            </Card>
 
             {saleToReview && (
                 <Modal 
@@ -530,6 +533,7 @@ const Sales: React.FC = () => {
                     onClose={() => setSaleToReview(null)} 
                     title={`Receipt #${saleToReview.receiptNumber}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrintSaleReceipt}>Print Receipt</Button>
@@ -547,6 +551,7 @@ const Sales: React.FC = () => {
                     onClose={() => setReceiptDetails(null)} 
                     title={`Receipt #${receiptDetails.payment.id}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrintPaymentReceipt}>Print Receipt</Button>
@@ -564,6 +569,7 @@ const Sales: React.FC = () => {
                     onClose={() => setBillForReceipt(null)}
                     title={`Receipt for ${billForReceipt.vendor}`}
                     size="sm"
+                    scrollable={true}
                     footer={
                         <>
                             <Button onClick={handlePrintBillReceipt}>Print Receipt</Button>

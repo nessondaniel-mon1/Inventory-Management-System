@@ -8,13 +8,18 @@ interface TableHeader {
 interface TableProps {
     headers: (string | TableHeader)[];
     children: React.ReactNode;
+    scrollable?: boolean; // New prop
+    maxHeight?: string; // New prop for max-height
 }
 
-const Table: React.FC<TableProps> = ({ headers, children }) => {
+const Table: React.FC<TableProps> = ({ headers, children, scrollable = false, maxHeight = '75vh' }) => {
+    const scrollClasses = scrollable ? `overflow-y-auto` : '';
+    const heightClass = scrollable ? `max-h-[${maxHeight}]` : '';
+
     return (
-        <div className="overflow-x-auto">
+        <div className={`overflow-x-auto ${scrollClasses} ${heightClass}`}>
             <table className="min-w-full divide-y divide-border table-fixed w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0 z-20">
                     <tr>
                         {headers.map((header, index) => {
                             // FIX: The previous logic was causing a TypeScript type inference issue.
