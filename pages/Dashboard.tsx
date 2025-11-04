@@ -252,15 +252,15 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Today's Sales" value={`$${dailySales.total.toFixed(2)}`} icon={<DollarSignIcon />} color="#4f46e5" change={salesChange.text} changeType={salesChange.type} />
-                <StatCard title="Today's Profit" value={`$${dailySales.profit.toFixed(2)}`} icon={<TrendingUpIcon />} color="#10b981" change={profitChange.text} changeType={profitChange.type} />
-                <StatCard title="Today's Payments" value={`$${dailyPayments.received.toFixed(2)}`} icon={<WalletIcon />} color="#3b82f6" change={paymentsReceivedChange.text} changeType={paymentsReceivedChange.type} />
-                <StatCard title="Total Owed To You" value={`$${totalOwed.toFixed(2)}`} icon={<CreditCardIcon />} color="#f59e0b" />
+                <StatCard title="Today's Sales" value={"shs " + dailySales.total.toFixed(2)} color="#4f46e5" change={salesChange.text} changeType={salesChange.type} />
+                <StatCard title="Today's Profit" value={"shs " + dailySales.profit.toFixed(2)} icon={<TrendingUpIcon />} color="#10b981" change={profitChange.text} changeType={profitChange.type} />
+                <StatCard title="Today's Payments" value={"shs " + dailyPayments.received.toFixed(2)} icon={<WalletIcon />} color="#3b82f6" change={paymentsReceivedChange.text} changeType={paymentsReceivedChange.type} />
+                <StatCard title="Total Owed To You" value={"shs " + totalOwed.toFixed(2)} icon={<CreditCardIcon />} color="#f59e0b" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard title="Bills Paid Today" value={`$${dailyPayments.paid.toFixed(2)}`} icon={<ReceiptIcon />} color="#ef4444" change={billsPaidChange.text} changeType={billsPaidChange.type} />
-                <StatCard title="Inventory Value" value={`$${totalInventoryValue.toFixed(2)}`} icon={<ArchiveIcon />} color="#3b82f6" />
+                <StatCard title="Bills Paid Today" value={"shs " + dailyPayments.paid.toFixed(2)} icon={<ReceiptIcon />} color="#ef4444" change={billsPaidChange.text} changeType={billsPaidChange.type} />
+                <StatCard title="Inventory Value" value={"shs " + totalInventoryValue.toFixed(2)} icon={<ArchiveIcon />} color="#3b82f6" />
                 <StatCard title="Overdue Bills" value={`${overdueBillsCount}`} icon={<AlertTriangleIcon />} color="#ef4444" />
             </div>
 
@@ -278,71 +278,71 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
             >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card title="Daily Sales">
-                        <p className="text-2xl font-bold mb-2">${dailyDetailed.total.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mb-2">{"shs " + dailyDetailed.total.toFixed(2)}</p>
                         <div className="space-y-1 text-base text-text-secondary">
-                            <p>Cash Sales: <span className="font-semibold text-text-primary float-right">${dailyDetailed.cash.toFixed(2)}</span></p>
-                            <p>Credit Sales: <span className="font-semibold text-text-primary float-right">${dailyDetailed.credit.toFixed(2)}</span></p>
-                            <p>Invoice Sales: <span className="font-semibold text-text-primary float-right">${dailyDetailed.invoice.toFixed(2)}</span></p>
+                            <p>Cash Sales: <span className="font-semibold text-text-primary float-right">{"shs " + dailyDetailed.cash.toFixed(2)}</span></p>
+                            <p>Credit Sales: <span className="font-semibold text-text-primary float-right">{"shs " + dailyDetailed.credit.toFixed(2)}</span></p>
+                            <p>Invoice Sales: <span className="font-semibold text-text-primary float-right">{"shs " + dailyDetailed.invoice.toFixed(2)}</span></p>
                         </div>
                     </Card>
                     <Card title="Weekly Sales">
-                        <p className="text-2xl font-bold mb-2">${weeklyDetailed.total.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mb-2">{"shs " + weeklyDetailed.total.toFixed(2)}</p>
                         <div className="space-y-1 text-base text-text-secondary">
-                             <p>Cash Sales: <span className="font-semibold text-text-primary float-right">${weeklyDetailed.cash.toFixed(2)}</span></p>
-                            <p>Credit Sales: <span className="font-semibold text-text-primary float-right">${weeklyDetailed.credit.toFixed(2)}</span></p>
-                            <p>Invoice Sales: <span className="font-semibold text-text-primary float-right">${weeklyDetailed.invoice.toFixed(2)}</span></p>
+                             <p>Cash Sales: <span className="font-semibold text-text-primary float-right">{"shs " + weeklyDetailed.cash.toFixed(2)}</span></p>
+                            <p>Credit Sales: <span className="font-semibold text-text-primary float-right">{"shs " + weeklyDetailed.credit.toFixed(2)}</span></p>
+                            <p>Invoice Sales: <span className="font-semibold text-text-primary float-right">{"shs " + weeklyDetailed.invoice.toFixed(2)}</span></p>
                         </div>
                     </Card>
                     <Card title="Monthly Sales">
-                        <p className="text-2xl font-bold mb-2">${monthlyDetailed.total.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mb-2">{"shs " + monthlyDetailed.total.toFixed(2)}</p>
                         <div className="space-y-1 text-base text-text-secondary">
-                             <p>Cash Sales: <span className="font-semibold text-text-primary float-right">${monthlyDetailed.cash.toFixed(2)}</span></p>
-                            <p>Credit Sales: <span className="font-semibold text-text-primary float-right">${monthlyDetailed.credit.toFixed(2)}</span></p>
-                            <p>Invoice Sales: <span className="font-semibold text-text-primary float-right">${monthlyDetailed.invoice.toFixed(2)}</span></p>
+                             <p>Cash Sales: <span className="font-semibold text-text-primary float-right">{"shs " + monthlyDetailed.cash.toFixed(2)}</span></p>
+                            <p>Credit Sales: <span className="font-semibold text-text-primary float-right">{"shs " + monthlyDetailed.credit.toFixed(2)}</span></p>
+                            <p>Invoice Sales: <span className="font-semibold text-text-primary float-right">shs {monthlyDetailed.invoice.toFixed(2)}</span></p>
                         </div>
                     </Card>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                     <Card title="Daily Payments">
-                        <p className="text-2xl font-bold mb-2">${dailyDetailedReceived.total.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mb-2">shs {dailyDetailedReceived.total.toFixed(2)}</p>
                         <div className="space-y-1 text-base text-text-secondary">
-                            <p>Credit Payments: <span className="font-semibold text-text-primary float-right">${dailyDetailedReceived.credit.toFixed(2)}</span></p>
-                            <p>Invoice Payments: <span className="font-semibold text-text-primary float-right">${dailyDetailedReceived.invoice.toFixed(2)}</span></p>
+                            <p>Credit Payments: <span className="font-semibold text-text-primary float-right">shs {dailyDetailedReceived.credit.toFixed(2)}</span></p>
+                            <p>Invoice Payments: <span className="font-semibold text-text-primary float-right">shs {dailyDetailedReceived.invoice.toFixed(2)}</span></p>
                         </div>
                         <div className="mt-4 pt-4 border-t border-border">
-                            <p className="text-xl font-bold mb-2 text-red-600">Bills Paid: ${dailyDetailedBillsPaid.total.toFixed(2)}</p>
+                            <p className="text-xl font-bold mb-2 text-red-600">Bills Paid: shs {dailyDetailedBillsPaid.total.toFixed(2)}</p>
                             <div className="space-y-1 text-base text-text-secondary">
-                                <p>Recurring Bills: <span className="font-semibold text-text-primary float-right">${dailyDetailedBillsPaid.recurring.toFixed(2)}</span></p>
-                                <p>One-time Bills: <span className="font-semibold text-text-primary float-right">${dailyDetailedBillsPaid.oneTime.toFixed(2)}</span></p>
+                                <p>Recurring Bills: <span className="font-semibold text-text-primary float-right">shs {dailyDetailedBillsPaid.recurring.toFixed(2)}</span></p>
+                                <p>One-time Bills: <span className="font-semibold text-text-primary float-right">shs {dailyDetailedBillsPaid.oneTime.toFixed(2)}</span></p>
                             </div>
                         </div>
                     </Card>
                      <Card title="Weekly Payments">
-                        <p className="text-2xl font-bold mb-2">${weeklyDetailedReceived.total.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mb-2">shs {weeklyDetailedReceived.total.toFixed(2)}</p>
                         <div className="space-y-1 text-base text-text-secondary">
-                            <p>Credit Payments: <span className="font-semibold text-text-primary float-right">${weeklyDetailedReceived.credit.toFixed(2)}</span></p>
-                            <p>Invoice Payments: <span className="font-semibold text-text-primary float-right">${weeklyDetailedReceived.invoice.toFixed(2)}</span></p>
+                            <p>Credit Payments: <span className="font-semibold text-text-primary float-right">shs {weeklyDetailedReceived.credit.toFixed(2)}</span></p>
+                            <p>Invoice Payments: <span className="font-semibold text-text-primary float-right">shs {weeklyDetailedReceived.invoice.toFixed(2)}</span></p>
                         </div>
                         <div className="mt-4 pt-4 border-t border-border">
-                            <p className="text-xl font-bold mb-2 text-red-600">Bills Paid: ${weeklyDetailedBillsPaid.total.toFixed(2)}</p>
+                            <p className="text-xl font-bold mb-2 text-red-600">Bills Paid: shs {weeklyDetailedBillsPaid.total.toFixed(2)}</p>
                             <div className="space-y-1 text-base text-text-secondary">
-                                <p>Recurring Bills: <span className="font-semibold text-text-primary float-right">${weeklyDetailedBillsPaid.recurring.toFixed(2)}</span></p>
-                                <p>One-time Bills: <span className="font-semibold text-text-primary float-right">${weeklyDetailedBillsPaid.oneTime.toFixed(2)}</span></p>
+                                <p>Recurring Bills: <span className="font-semibold text-text-primary float-right">shs {weeklyDetailedBillsPaid.recurring.toFixed(2)}</span></p>
+                                <p>One-time Bills: <span className="font-semibold text-text-primary float-right">shs {weeklyDetailedBillsPaid.oneTime.toFixed(2)}</span></p>
                             </div>
                         </div>
                     </Card>
                      <Card title="Monthly Payments">
-                        <p className="text-2xl font-bold mb-2">${monthlyDetailedReceived.total.toFixed(2)}</p>
+                        <p className="text-2xl font-bold mb-2">shs {monthlyDetailedReceived.total.toFixed(2)}</p>
                         <div className="space-y-1 text-base text-text-secondary">
-                            <p>Credit Payments: <span className="font-semibold text-text-primary float-right">${monthlyDetailedReceived.credit.toFixed(2)}</span></p>
-                            <p>Invoice Payments: <span className="font-semibold text-text-primary float-right">${monthlyDetailedReceived.invoice.toFixed(2)}</span></p>
+                            <p>Credit Payments: <span className="font-semibold text-text-primary float-right">shs {monthlyDetailedReceived.credit.toFixed(2)}</span></p>
+                            <p>Invoice Payments: <span className="font-semibold text-text-primary float-right">shs {monthlyDetailedReceived.invoice.toFixed(2)}</span></p>
                         </div>
                         <div className="mt-4 pt-4 border-t border-border">
-                            <p className="text-xl font-bold mb-2 text-red-600">Bills Paid: ${monthlyDetailedBillsPaid.total.toFixed(2)}</p>
+                            <p className="text-xl font-bold mb-2 text-red-600">Bills Paid: shs {monthlyDetailedBillsPaid.total.toFixed(2)}</p>
                             <div className="space-y-1 text-base text-text-secondary">
-                                <p>Recurring Bills: <span className="font-semibold text-text-primary float-right">${monthlyDetailedBillsPaid.recurring.toFixed(2)}</span></p>
-                                <p>One-time Bills: <span className="font-semibold text-text-primary float-right">${monthlyDetailedBillsPaid.oneTime.toFixed(2)}</span></p>
+                                <p>Recurring Bills: <span className="font-semibold text-text-primary float-right">shs {monthlyDetailedBillsPaid.recurring.toFixed(2)}</span></p>
+                                <p>One-time Bills: <span className="font-semibold text-text-primary float-right">shs {monthlyDetailedBillsPaid.oneTime.toFixed(2)}</span></p>
                             </div>
                         </div>
                     </Card>
@@ -352,30 +352,30 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
                     <Card title="Daily Gross Profit">
                         <div className="flex items-center mb-2">
                             <TrendingUpIcon className="w-8 h-8 text-secondary mr-4" />
-                            <p className="text-3xl font-bold text-secondary">${dailyDetailed.profit.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-secondary">shs {dailyDetailed.profit.toFixed(2)}</p>
                         </div>
                         <div className="space-y-1 text-base text-text-secondary border-t border-border pt-2 mt-2">
-                            <p>Total Sales: <span className="font-semibold text-text-primary float-right">${dailyDetailed.total.toFixed(2)}</span></p>
+                            <p>Total Sales: <span className="font-semibold text-text-primary float-right">shs {dailyDetailed.total.toFixed(2)}</span></p>
                             <p>Profit Margin: <span className="font-semibold text-text-primary float-right">{dailyDetailed.margin.toFixed(1)}%</span></p>
                         </div>
                     </Card>
                      <Card title="Weekly Gross Profit">
                         <div className="flex items-center mb-2">
                             <TrendingUpIcon className="w-8 h-8 text-secondary mr-4" />
-                            <p className="text-3xl font-bold text-secondary">${weeklyDetailed.profit.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-secondary">shs {weeklyDetailed.profit.toFixed(2)}</p>
                         </div>
                          <div className="space-y-1 text-base text-text-secondary border-t border-border pt-2 mt-2">
-                            <p>Total Sales: <span className="font-semibold text-text-primary float-right">${weeklyDetailed.total.toFixed(2)}</span></p>
+                            <p>Total Sales: <span className="font-semibold text-text-primary float-right">shs {weeklyDetailed.total.toFixed(2)}</span></p>
                             <p>Profit Margin: <span className="font-semibold text-text-primary float-right">{weeklyDetailed.margin.toFixed(1)}%</span></p>
                         </div>
                     </Card>
                      <Card title="Monthly Gross Profit">
                         <div className="flex items-center mb-2">
                             <TrendingUpIcon className="w-8 h-8 text-secondary mr-4" />
-                            <p className="text-3xl font-bold text-secondary">${monthlyDetailed.profit.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-secondary">shs {monthlyDetailed.profit.toFixed(2)}</p>
                         </div>
                          <div className="space-y-1 text-base text-text-secondary border-t border-border pt-2 mt-2">
-                            <p>Total Sales: <span className="font-semibold text-text-primary float-right">${monthlyDetailed.total.toFixed(2)}</span></p>
+                            <p>Total Sales: <span className="font-semibold text-text-primary float-right">shs {monthlyDetailed.total.toFixed(2)}</span></p>
                             <p>Profit Margin: <span className="font-semibold text-text-primary float-right">{monthlyDetailed.margin.toFixed(1)}%</span></p>
                         </div>
                     </Card>
@@ -413,10 +413,10 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage }) => {
                         {topSuppliersBySpend.map((supplier, index) => (
                             <div key={supplier.id} className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                    <span className="text-lg font-bold text-text-secondary mr-3">{index + 1}.</span>
+                                    <span className="text-lg font-bold text-text-secondary mr-3 flex-shrink-0">{index + 1}.</span>
                                     <p className="font-semibold text-text-primary truncate">{supplier.name}</p>
                                 </div>
-                                <p className="font-bold text-primary">${supplier.total.toFixed(2)}</p>
+                                <p className="font-bold text-primary whitespace-nowrap">shs {supplier.total.toFixed(2)}</p>
                             </div>
                         ))}
                          {topSuppliersBySpend.length === 0 && <p className="text-center text-text-secondary py-8">No supply data available.</p>}

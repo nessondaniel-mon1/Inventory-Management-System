@@ -70,13 +70,13 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({ sale, getPro
                                 {getProductName(item.productId)}
                             </span>
                             <span className="text-center">{item.quantity}x</span>
-                            <span className="text-right">@${item.salePrice.toFixed(2)}</span>
-                            <span className="text-right font-semibold">${(item.quantity * item.salePrice).toFixed(2)}</span>
+                            <span className="text-right">@shs {item.salePrice.toFixed(2)}</span>
+                            <span className="text-right font-semibold">shs {(item.quantity * item.salePrice).toFixed(2)}</span>
                         </div>
                         {item.discount && item.discount.value > 0 && (
                             <div className="pl-4 text-gray-600 text-[9px] grid grid-cols-[1fr_auto]">
-                                <span>Discount ({item.discount.type === 'fixed' ? `$${item.discount.value.toFixed(2)}` : `${item.discount.value}%`})</span>
-                                <span className="text-right">-${(calculateItemDiscountAmount(item)).toFixed(2)}</span>
+                                <span>Discount ({item.discount.type === 'fixed' ? `shs {item.discount.value.toFixed(2)}` : `${item.discount.value}%`})</span>
+                                <span className="text-right">-shs {(calculateItemDiscountAmount(item)).toFixed(2)}</span>
                             </div>
                         )}
                     </div>
@@ -87,27 +87,27 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({ sale, getPro
             <div className="text-xs space-y-0.5">
                 <div className="grid grid-cols-2 gap-x-2">
                     <span>Subtotal:</span>
-                    <span className="text-right">${subtotal.toFixed(2)}</span>
+                    <span className="text-right">shs {subtotal.toFixed(2)}</span>
                 </div>
                  {totalItemDiscounts > 0.001 && (
                     <div className="grid grid-cols-2 gap-x-2">
                         <span>Item Discounts:</span>
-                        <span className="text-right">-${totalItemDiscounts.toFixed(2)}</span>
+                        <span className="text-right">-shs {totalItemDiscounts.toFixed(2)}</span>
                     </div>
                 )}
                  {totalCartDiscount > 0.001 && (
                     <div className="grid grid-cols-2 gap-x-2">
                         <span>Order Discount:</span>
-                        <span className="text-right">-${totalCartDiscount.toFixed(2)}</span>
+                        <span className="text-right">-shs {totalCartDiscount.toFixed(2)}</span>
                     </div>
                 )}
                 <div className="grid grid-cols-2 gap-x-2">
                     <span>Tax ({sale.tax ? (sale.tax.type === 'fixed' ? 'Fixed' : `${sale.tax.value}%`) : '0%'}):</span>
-                    <span className="text-right">${(sale.tax?.amount || 0).toFixed(2)}</span>
+                    <span className="text-right">shs {(sale.tax?.amount || 0).toFixed(2)}</span>
                 </div>
                  <div className="grid grid-cols-2 gap-x-2 font-bold text-base mt-1">
                     <span>TOTAL:</span>
-                    <span className="text-right">${sale.total.toFixed(2)}</span>
+                    <span className="text-right">shs {sale.total.toFixed(2)}</span>
                 </div>
             </div>
             <hr className="my-1 border-dashed border-black" />
@@ -124,20 +124,20 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({ sale, getPro
                 {sale.paymentStatus === 'credit' && (
                     <div className="grid grid-cols-2 gap-x-2 mt-1 pt-1 border-t border-dashed border-black font-bold">
                         <span>CHARGED TO ACCOUNT:</span>
-                        <span className="text-right">${sale.total.toFixed(2)}</span>
+                        <span className="text-right">shs {sale.total.toFixed(2)}</span>
                     </div>
                 )}
                 {sale.paymentStatus === 'invoice' && (
                     <div className="grid grid-cols-2 gap-x-2 mt-1 pt-1 border-t border-dashed border-black font-bold">
                         <span>AMOUNT DUE:</span>
-                        <span className="text-right">${sale.total.toFixed(2)}</span>
+                        <span className="text-right">shs {sale.total.toFixed(2)}</span>
                     </div>
                 )}
             </div>
             <hr className="my-1 border-dashed border-black" />
             <div className="text-center text-[9px] mt-1 text-gray-500">
                 <p>Internal Data:</p>
-                <p>COGS: ${sale.totalCost.toFixed(2)} | Profit: ${sale.profit.toFixed(2)}</p>
+                <p>COGS: shs {sale.totalCost.toFixed(2)} | Profit: shs {sale.profit.toFixed(2)}</p>
             </div>
             <p className="text-center text-[10px] mt-1">{receiptSettings.footerText || 'Thank you for your business!'}</p>
         </div>
@@ -185,17 +185,17 @@ export const PrintablePaymentReceipt: React.FC<PrintablePaymentReceiptProps> = (
             <div className="text-xs space-y-0.5">
                 <div className="grid grid-cols-2 gap-x-2">
                     <span>Previous Balance:</span>
-                    <span className="text-right">${previousBalance.toFixed(2)}</span>
+                    <span className="text-right">shs {previousBalance.toFixed(2)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-x-2 font-bold text-base mt-1">
                     <span>AMOUNT PAID:</span>
-                    <span className="text-right">${payment.amount.toFixed(2)}</span>
+                    <span className="text-right">shs {payment.amount.toFixed(2)}</span>
                 </div>
             </div>
             <hr className="my-1 border-dashed border-black" />
              <div className="grid grid-cols-2 gap-x-2 font-bold text-base">
                 <span>Remaining Balance:</span>
-                <span className="text-right">${payment.balanceAfterPayment?.toFixed(2)}</span>
+                <span className="text-right">shs {payment.balanceAfterPayment?.toFixed(2)}</span>
             </div>
             <hr className="my-1 border-dashed border-black" />
             <div className="text-[10px] space-y-0.5">
@@ -250,7 +250,7 @@ export const PrintableBillReceipt: React.FC<PrintableBillReceiptProps> = ({ bill
             <hr className="my-1 border-dashed border-black" />
             <div className="grid grid-cols-2 gap-x-2 font-bold text-base mt-2">
                 <span>AMOUNT PAID:</span>
-                <span className="text-right">${bill.amount.toFixed(2)}</span>
+                <span className="text-right">shs {bill.amount.toFixed(2)}</span>
             </div>
             <hr className="my-1 border-dashed border-black" />
             <p className="text-center text-[10px] mt-2">{receiptSettings.footerText || 'Thank you!'}</p>

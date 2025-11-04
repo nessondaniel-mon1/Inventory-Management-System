@@ -126,7 +126,7 @@ const ProfitTrendChart: React.FC = () => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                         <YAxis tick={{ fontSize: 12 }} ticks={ticks} domain={[0, 'dataMax']} tickFormatter={formatYAxis} />
-                        <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                        <Tooltip formatter={(value: number) => `shs {value.toFixed(2)}`} />
                         <Legend />
                         <Line type="monotone" dataKey="profit" stroke="#10b981" name="Profit" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 8 }} />
                     </LineChart>

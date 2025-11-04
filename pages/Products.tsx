@@ -187,7 +187,7 @@ const Products: React.FC = () => {
                             return (
                                 <tr key={p.id} className="hover:bg-yellow-100">
                                     <td className="px-6 py-2 text-base font-medium text-text-primary truncate" title={p.name}>{p.name}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary text-right">${p.price.toFixed(2)}</td>
+                                    <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary text-right">shs {p.price.toFixed(2)}</td>
                                     <td className={`px-6 py-2 whitespace-nowrap text-base font-semibold text-right ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         {margin.toFixed(1)}%
                                     </td>
@@ -315,7 +315,7 @@ const Products: React.FC = () => {
             <Modal isOpen={isPriceModalOpen} onClose={() => setIsPriceModalOpen(false)} title={`Update price for ${selectedProduct?.name}`} footer={
                 <><Button onClick={handleUpdatePrice}>Update Price</Button><Button variant="ghost" onClick={() => setIsPriceModalOpen(false)}>Cancel</Button></>
             }>
-                <p>Current price: <span className="font-bold">${selectedProduct?.price.toFixed(2)}</span></p>
+                <p>Current price: <span className="font-bold">shs {selectedProduct?.price.toFixed(2)}</span></p>
                 <Input label="New Price" type="number" value={newPrice} onChange={e => setNewPrice(parseFloat(e.target.value) || 0)} />
             </Modal>
             

@@ -174,7 +174,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
                                     {searchResults.bills.length > 0 && (
                                         <div>
                                             <h4 className="px-3 py-2 text-sm font-semibold text-text-secondary bg-gray-50 border-t border-b">Bills</h4>
-                                            <ul>{searchResults.bills.map(b => <li key={b.id} onClick={() => handleResultClick('payments')} className="px-3 py-2 hover:bg-yellow-100 cursor-pointer flex items-center gap-3"><FileTextIcon className="w-5 h-5 text-gray-400"/> {b.vendor} - ${b.amount.toFixed(2)}</li>)}</ul>
+                                            <ul>{searchResults.bills.map(b => <li key={b.id} onClick={() => handleResultClick('payments')} className="px-3 py-2 hover:bg-yellow-100 cursor-pointer flex items-center gap-3"><FileTextIcon className="w-5 h-5 text-gray-400"/> {b.vendor} - shs {b.amount.toFixed(2)}</li>)}</ul>
                                         </div>
                                     )}
                                      {searchResults.pages.length > 0 && (

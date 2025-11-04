@@ -238,12 +238,12 @@ const Payments: React.FC = () => {
     const handleReceivePayment = async () => {
         const amount = Number(paymentAmount);
         if (!selectedCustomer || !receivingEmployeeId || isNaN(amount) || amount <= 0 || amount > selectedCustomer.creditBalance) {
-            setPaymentError(`Please enter a valid amount up to $${selectedCustomer?.creditBalance.toFixed(2)}.`);
+            setPaymentError(`Please enter a valid amount up to shs {selectedCustomer?.creditBalance.toFixed(2)}.`);
             return;
         }
         const newPayment = await receivePayment(selectedCustomer.id, amount, receivingEmployeeId);
         const originalCustomerState = customers.find(c => c.id === selectedCustomer.id);
-        setToastMessage({ message: `Payment of $${amount.toFixed(2)} received from ${selectedCustomer.name}.`, type: 'success' });
+        setToastMessage({ message: `Payment of shs {amount.toFixed(2)} received from {selectedCustomer.name}.`, type: 'success' });
         if (originalCustomerState) {
             setReceiptDetails({ payment: newPayment, customer: originalCustomerState });
         }
@@ -292,12 +292,12 @@ const Payments: React.FC = () => {
     const handleReceiveInvoicePayment = async () => {
         const amount = Number(paymentAmount);
         if (!selectedInvoice || !receivingEmployeeId || isNaN(amount) || amount <= 0 || amount > selectedInvoice.total) {
-            setPaymentError(`Please enter a valid amount up to $${selectedInvoice?.total.toFixed(2)}.`);
+            setPaymentError(`Please enter a valid amount up to shs {selectedInvoice?.total.toFixed(2)}.`);
             return;
         }
         const newPayment = await receiveInvoicePayment(selectedInvoice.id, amount, receivingEmployeeId);
         const originalCustomerState = customers.find(c => c.id === selectedInvoice.customerId);
-        setToastMessage({ message: `Payment of $${amount.toFixed(2)} for invoice #${selectedInvoice.invoiceDetails?.invoiceNumber} received.`, type: 'success' });
+        setToastMessage({ message: `Payment of shs {amount.toFixed(2)} for invoice #{selectedInvoice.invoiceDetails?.invoiceNumber} received.`, type: 'success' });
         if(originalCustomerState){
             setReceiptDetails({ payment: newPayment, customer: originalCustomerState });
         }
@@ -329,7 +329,7 @@ const Payments: React.FC = () => {
     const handlePayBill = () => {
         if (!selectedBill || !payingEmployeeId) return;
         payBill(selectedBill.id, payingEmployeeId);
-        setToastMessage({ message: `Bill for $${selectedBill.amount.toFixed(2)} to ${selectedBill.vendor} paid.`, type: 'success' });
+        setToastMessage({ message: `Bill for shs {selectedBill.amount.toFixed(2)} to {selectedBill.vendor} paid.`, type: 'success' });
         closePayBillModal();
     };
     
@@ -523,7 +523,7 @@ const Payments: React.FC = () => {
                                         <td className={`px-6 py-2 whitespace-nowrap text-base truncate max-w-[120px] ${isOverdue ? 'text-red-500 font-semibold' : 'text-text-secondary'}`}>
                                             {new Date(b.dueDate).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary">${b.amount.toFixed(2)}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary">shs {b.amount.toFixed(2)}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base">
                                             <span className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${b.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                                 {b.status}
@@ -662,10 +662,10 @@ const Payments: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className={`px-6 py-2 whitespace-nowrap text-base font-semibold text-right ${isOutbound ? 'text-red-600' : 'text-green-600'}`}>
-                                            ${p.amount.toFixed(2)}
+                                            shs {p.amount.toFixed(2)}
                                         </td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-right text-text-primary">
-                                            {p.balanceAfterPayment !== undefined ? `$${p.balanceAfterPayment.toFixed(2)}` : 'N/A'}
+                                            {p.balanceAfterPayment !== undefined ? `shs {p.balanceAfterPayment.toFixed(2)}` : 'N/A'}
                                         </td>
                                     </tr>
                                 );
@@ -680,7 +680,7 @@ const Payments: React.FC = () => {
                                     <td className="px-6 py-2 text-base font-medium text-text-primary max-w-sm truncate" title={b.vendor}>{b.vendor}</td>
                                     <td className="px-6 py-2 text-base text-text-secondary max-w-md truncate" title={b.description}>{b.description}</td>
                                     <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{b.category}</td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-right text-text-primary">${b.amount.toFixed(2)}</td>
+                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-right text-text-primary">shs {b.amount.toFixed(2)}</td>
                                 </tr>
                             ))}
                         </Table>
@@ -696,7 +696,7 @@ const Payments: React.FC = () => {
                 footer={<><Button onClick={handleReceivePayment} disabled={!receivingEmployeeId}>Confirm Payment</Button><Button variant="ghost" onClick={closeReceiveModal}>Cancel</Button></>}
             >
                 <div className="space-y-4">
-                    <p className="text-lg">Current Balance: <span className="font-bold text-red-600">${selectedCustomer?.creditBalance.toFixed(2)}</span></p>
+                    <p className="text-lg">Current Balance: <span className="font-bold text-red-600">shs {selectedCustomer?.creditBalance.toFixed(2)}</span></p>
                     <Input
                         label="Payment Amount"
                         type="number"
@@ -729,7 +729,7 @@ const Payments: React.FC = () => {
             >
                 <div className="space-y-4">
                     <p>Customer: <span className="font-bold">{getCustomerName(selectedInvoice?.customerId || '')}</span></p>
-                    <p className="text-lg">Invoice Amount: <span className="font-bold text-blue-600">${selectedInvoice?.total.toFixed(2)}</span></p>
+                    <p className="text-lg">Invoice Amount: <span className="font-bold text-blue-600">shs {selectedInvoice?.total.toFixed(2)}</span></p>
                     <Input
                         label="Payment Amount"
                         type="number"
@@ -762,7 +762,7 @@ const Payments: React.FC = () => {
             >
                 <div className="space-y-4">
                     <p className="text-lg">
-                        Are you sure you want to pay <span className="font-bold">${selectedBill?.amount.toFixed(2)}</span> to <span className="font-bold">{selectedBill?.vendor}</span>?
+                        Are you sure you want to pay <span className="font-bold">shs {selectedBill?.amount.toFixed(2)}</span> to <span className="font-bold">{selectedBill?.vendor}</span>?
                     </p>
                     <Select
                         label="Paid By"
@@ -800,7 +800,7 @@ const Payments: React.FC = () => {
                             </div>
                             <div className="text-right">
                                 <p className="text-sm font-medium text-text-secondary">Amount</p>
-                                <p className="text-2xl font-bold text-primary">${billForDetails.amount.toFixed(2)}</p>
+                                <p className="text-2xl font-bold text-primary">shs {billForDetails.amount.toFixed(2)}</p>
                             </div>
                         </div>
                         <div className="space-y-3">

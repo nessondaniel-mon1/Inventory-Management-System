@@ -66,7 +66,7 @@ const ItemDiscountModal: React.FC<ItemDiscountModalProps> = ({ isOpen, onClose, 
                 <div className="flex gap-2">
                     <div className="w-1/3">
                         <Select label="Type" value={type} onChange={e => setType(e.target.value as 'fixed' | 'percentage')}>
-                            <option value="fixed">Fixed ($)</option>
+                            <option value="fixed">Fixed (SHS)</option>
                             <option value="percentage">Percent (%)</option>
                         </Select>
                     </div>
@@ -98,6 +98,8 @@ const Accounting: React.FC = () => {
     const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'credit' | 'invoice'>('all');
     const [isSaving, setIsSaving] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Overall cart discount
     const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
@@ -386,16 +388,32 @@ const Accounting: React.FC = () => {
     };
     
     const dailySalesHistory = useMemo(() => {
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        let filteredSales = sales.filter(sale => new Date(sale.date) >= todayStart && currentUser && sale.employeeId === currentUser.id);
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        
+        return sales.filter(sale => {
+            // Text search logic
+            let matchesText = true;
+            if (searchTerm.trim() !== '') {
+                const customerName = sale.customerId ? getCustomerName(sale.customerId) : 'N/A';
+                matchesText = (
+                    getEmployeeName(sale.employeeId).toLowerCase().includes(lowercasedSearchTerm) ||
+                    customerName.toLowerCase().includes(lowercasedSearchTerm) ||
+                    sale.receiptNumber.toLowerCase().includes(lowercasedSearchTerm)
+                );
+            }
 
-        if (statusFilter !== 'all') {
-            filteredSales = filteredSales.filter(sale => sale.paymentStatus === statusFilter);
-        }
+            // Date search logic
+            const matchesDate = new Date(sale.date).toDateString() === selectedDate.toDateString();
 
-        return filteredSales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }, [sales, statusFilter]);
+            // Status filter logic
+            const matchesStatus = statusFilter === 'all' || sale.paymentStatus === statusFilter;
+
+            // Employee filter
+            const matchesEmployee = sale.employeeId === currentUser?.id;
+
+            return matchesText && matchesDate && matchesStatus && matchesEmployee;
+        }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [sales, searchTerm, getEmployeeName, getCustomerName, selectedDate, statusFilter, currentUser]);
 
     return (
         <div className="space-y-6">
@@ -422,7 +440,7 @@ const Accounting: React.FC = () => {
                                         <li key={p.id} onClick={() => addToCart(p)} className="px-3 py-1.5 hover:bg-yellow-100 cursor-pointer text-sm">
                                             <div className="flex justify-between">
                                                 <span>{p.name}</span>
-                                                <span className="text-text-secondary">${p.price.toFixed(2)} (Stock: {p.stock})</span>
+                                                <span className="text-text-secondary">SHS {p.price.toFixed(2)} (Stock: {p.stock})</span>
                                             </div>
                                         </li>
                                     ))}
@@ -441,7 +459,7 @@ const Accounting: React.FC = () => {
                                     <div key={item.productId} className="grid grid-cols-[1fr_auto] items-center px-2 py-1 border-b border-border gap-2">
                                        <div className="min-w-0">
                                             <p className="font-semibold truncate" title={getProductName(item.productId)}>{getProductName(item.productId)}</p>
-                                            <p className="text-sm text-text-secondary">${item.salePrice.toFixed(2)} (Stock: {product.stock})</p>
+                                            <p className="text-sm text-text-secondary">SHS {item.salePrice.toFixed(2)} (Stock: {product.stock})</p>
                                             {quantityExceedsStock && <p className="text-xs text-red-500">Not enough stock!</p>}
                                         </div>
                                        <div className="flex items-center flex-wrap gap-2">
@@ -461,7 +479,7 @@ const Accounting: React.FC = () => {
                                            <span onClick={() => updateQuantity(item.productId, 1)} className="cursor-pointer text-gray-500 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed w-8 h-8 flex items-center justify-center" disabled={Number(item.quantity) >= product.stock}>
                                                 <PlusIcon className="w-4 h-4" />
                                             </span>
-                                            <span className="w-24 text-right font-bold">${((Number(item.quantity) || 0) * item.salePrice).toFixed(2)}</span>
+                                            <span className="w-24 text-right font-bold">SHS {((Number(item.quantity) || 0) * item.salePrice).toFixed(2)}</span>
                                             <span onClick={() => setItemToDiscount(item)} className={`cursor-pointer hover:text-primary w-8 h-8 flex items-center justify-center ${hasDiscount ? 'text-secondary' : 'text-gray-500'}`} aria-label="Add item discount">
                                                 <TagIcon className="w-4 h-4" />
                                             </span>
@@ -512,7 +530,7 @@ const Accounting: React.FC = () => {
                             <div className="flex gap-2">
                                 <div className="w-1/3">
                                     <Select label="Order Discount" value={discountType} onChange={e => setDiscountType(e.target.value as 'fixed' | 'percentage')}>
-                                        <option value="fixed">Fixed ($)</option>
+                                        <option value="fixed">Fixed (UGX)</option>
                                         <option value="percentage">Percent (%)</option>
                                     </Select>
                                 </div>
@@ -530,7 +548,7 @@ const Accounting: React.FC = () => {
                                 <div className="w-1/3">
                                     <Select label="Tax" value={taxType} onChange={e => setTaxType(e.target.value as 'percentage' | 'fixed')}>
                                         <option value="percentage">Percent (%)</option>
-                                        <option value="fixed">Fixed ($)</option>
+                                        <option value="fixed">Fixed (UGX)</option>
                                     </Select>
                                 </div>
                                 <div className="w-2/3">
@@ -546,33 +564,33 @@ const Accounting: React.FC = () => {
                             <div className="pt-2 border-t border-border space-y-1 text-lg">
                                 <div className="flex justify-between items-center text-text-secondary">
                                     <span>Subtotal:</span>
-                                    <span>${subtotal.toFixed(2)}</span>
+                                    <span>SHS {subtotal.toFixed(2)}</span>
                                 </div>
                                 {itemDiscountsTotal > 0 && (
                                     <div className="flex justify-between items-center text-sm text-green-600">
                                         <span>Item Discounts:</span>
-                                        <span>-${itemDiscountsTotal.toFixed(2)}</span>
+                                        <span>-SHS {itemDiscountsTotal.toFixed(2)}</span>
                                     </div>
                                 )}
                                  {cartDiscountAmount > 0 && (
                                     <div className="flex justify-between items-center text-sm text-green-600">
                                         <span>Order Discount:</span>
-                                        <span>-${cartDiscountAmount.toFixed(2)}</span>
+                                        <span>-SHS {cartDiscountAmount.toFixed(2)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center font-semibold">
                                     <span>Total Before Tax:</span>
-                                    <span>${totalBeforeTax.toFixed(2)}</span>
+                                    <span>SHS {totalBeforeTax.toFixed(2)}</span>
                                 </div>
                                 {taxAmount > 0 && (
                                     <div className="flex justify-between items-center">
                                         <span>Tax:</span>
-                                        <span>+${taxAmount.toFixed(2)}</span>
+                                        <span>+SHS {taxAmount.toFixed(2)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center text-2xl font-bold">
                                     <span>Total:</span>
-                                    <span>${total.toFixed(2)}</span>
+                                    <span>SHS {total.toFixed(2)}</span>
                                 </div>
                             </div>
                             <Button 
@@ -598,29 +616,36 @@ const Accounting: React.FC = () => {
             <Card
                 title="Today's Sales"
                 action={
-                    <div className="space-x-2">
-                        {(['all', 'paid', 'credit', 'invoice'] as const).map(filter => (
-                            <Button
-                                key={filter}
-                                size="sm"
-                                variant={statusFilter === filter ? 'primary' : 'ghost'}
-                                onClick={() => setStatusFilter(filter)}
-                            >
-                                {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                            </Button>
-                        ))}
+                    <div className="flex items-center justify-center gap-4">
+                        <Input 
+                            placeholder="Search by customer or receipt..." 
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                        <Input
+                            type="date"
+                            value={selectedDate.toISOString().split('T')[0]}
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    const newDate = new Date(e.target.value + 'T00:00:00');
+                                    setSelectedDate(newDate);
+                                }
+                            }}
+                            className="w-auto bg-sidebar text-white border-slate-600"
+                            style={{ colorScheme: 'dark' }}
+                        />
                     </div>
                 }
             >
                  <Table headers={[
-                        { label: 'Receipt', className: 'min-w-[100px]' },
-                        { label: 'Date', className: 'min-w-[100px]' },
-                        { label: 'Customer', className: 'min-w-[120px]' },
-                        { label: 'Employee', className: 'min-w-[120px]' },
-                        { label: 'Products', className: 'min-w-[200px]' },
-                        { label: 'Total', className: 'min-w-[100px] text-right' },
-                        { label: 'Method', className: 'min-w-[100px]' },
-                        { label: 'Status', className: 'min-w-[100px]' }
+                        { label: 'Receipt', className: 'w-40' },
+                        { label: 'Date', className: 'w-32' },
+                        { label: 'Customer', className: 'w-32' },
+                        { label: 'Employee', className: 'w-32' },
+                        { label: 'Products', className: 'w-96' },
+                        { label: 'Total', className: 'w-32 text-right' },
+                        { label: 'Method', className: 'w-28' },
+                        { label: 'Status', className: 'w-28' }
                      ]} scrollable={true} maxHeight="550px">
                         {dailySalesHistory.map(sale => {
                             const receiptText = sale.paymentStatus === 'invoice' && sale.invoiceDetails?.invoiceNumber
@@ -644,13 +669,13 @@ const Accounting: React.FC = () => {
                                                         {getProductName(item.productId)}
                                                     </span>
                                                     <span className="flex-shrink-0 whitespace-nowrap">
-                                                        {item.quantity} x @ ${item.salePrice.toFixed(2)}
+                                                        {item.quantity} x @ SHS {item.salePrice.toFixed(2)}
                                                     </span>
                                                 </div>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary text-right">${sale.total.toFixed(2)}</td>
+                                    <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary text-right">SHS {sale.total.toFixed(2)}</td>
                                     <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary capitalize">{sale.paymentMethod}</td>
                                     <td className="px-6 py-2 whitespace-nowrap text-base">
                                         <span className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${
@@ -670,7 +695,7 @@ const Accounting: React.FC = () => {
                 <Modal 
                     isOpen={!!saleToPrint} 
                     onClose={() => setSaleToPrint(null)} 
-                    title={`Receipt #${saleToPrint.receiptNumber}`}
+                    title={`Receipt #{saleToPrint.receiptNumber}`}
                     size="sm"
                     scrollable={true}
                     footer={

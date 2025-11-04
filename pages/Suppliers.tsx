@@ -540,17 +540,15 @@ const Suppliers: React.FC = () => {
                                                 </span>
                                                 <div className="flex items-center gap-4 flex-shrink-0">
                                                     <span className="whitespace-nowrap">
-                                                        {item.quantity} x @ ${item.unitCost.toFixed(2)}
+                                                        {item.quantity} x @ shs {item.unitCost.toFixed(2)}
                                                     </span>
-                                                    <span className="font-semibold text-text-primary w-24 text-right">
-                                                        ${(item.quantity * item.unitCost).toFixed(2)}
-                                                    </span>
+                                                    <span className="font-semibold text-text-primary w-24 text-right">shs {(item.quantity * item.unitCost).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 </td>
-                                <td className="px-6 py-2 align-top whitespace-nowrap text-base font-semibold text-text-primary text-right">${group.totalCost.toFixed(2)}</td>
+                                <td className="px-6 py-2 align-top whitespace-nowrap text-base font-semibold text-text-primary text-right">shs {group.totalCost.toFixed(2)}</td>
                             </tr>
                         ))}
                     </Table>
@@ -637,8 +635,8 @@ const Suppliers: React.FC = () => {
                                             {getProductName(item.productId)}
                                         </td>
                                         <td className="px-4 py-2 text-base text-center text-gray-900">{item.quantity}</td>
-                                        <td className="px-4 py-2 text-base text-right text-gray-900">${item.unitCost.toFixed(2)}</td>
-                                        <td className="px-4 py-2 text-base font-semibold text-right text-gray-900">${(item.quantity * item.unitCost).toFixed(2)}</td>
+                                        <td className="px-4 py-2 text-base text-right text-gray-900">shs {item.unitCost.toFixed(2)}</td>
+                                        <td className="px-4 py-2 text-base font-semibold text-right text-gray-900">shs {(item.quantity * item.unitCost).toFixed(2)}</td>
                                         <td className="px-4 py-2 text-center">
                                             <Button size="sm" variant="danger" onClick={() => handleRemoveProductFromSupply(item.productId)}>Remove</Button>
                                         </td>
@@ -649,7 +647,7 @@ const Suppliers: React.FC = () => {
                     </div>
                     
                     {supplyItems.length > 0 && <div className="pt-4 border-t border-border text-right">
-                        <p className="text-xl font-bold text-text-primary">Grand Total: ${supplyGrandTotal.toFixed(2)}</p>
+                        <p className="text-xl font-bold text-text-primary">Grand Total: shs {supplyGrandTotal.toFixed(2)}</p>
                     </div>}
                 </div>
             </Modal>
@@ -840,9 +838,9 @@ const Suppliers: React.FC = () => {
                                     <div className="text-center font-semibold">{item.quantity}x</div>
                                     <div className="text-left min-w-0">
                                         <p className="truncate" title={getProductName(item.productId)}>{getProductName(item.productId)}</p>
-                                        <p className="text-gray-600">@ ${item.unitCost.toFixed(2)}</p>
+                                        <p className="text-gray-600">@ shs {item.unitCost.toFixed(2)}</p>
                                     </div>
-                                    <div className="text-right font-semibold">${(item.quantity * item.unitCost).toFixed(2)}</div>
+                                    <div className="text-right font-semibold">shs {(item.quantity * item.unitCost).toFixed(2)}</div>
                                 </div>
                             ))}
                         </div>
@@ -850,7 +848,7 @@ const Suppliers: React.FC = () => {
                         <hr className="my-2 border-dashed border-black" />
                         <div className="grid grid-cols-2 gap-x-4 font-bold text-lg mt-2">
                             <span>GRAND TOTAL:</span>
-                            <span className="text-right">${selectedSupplyDetails.totalCost.toFixed(2)}</span>
+                            <span className="text-right">shs {selectedSupplyDetails.totalCost.toFixed(2)}</span>
                         </div>
                     </div>
                 )}

@@ -95,7 +95,7 @@ const CustomerSegmentation: React.FC = () => {
                         {segments.vips.map(c => (
                             <li key={c.id} className="flex justify-between p-1 bg-gray-50 rounded">
                                 <span>{c.name}</span>
-                                <span className="font-semibold">${c.value.toFixed(2)}</span>
+                                <span className="font-semibold">shs {c.value.toFixed(2)}</span>
                             </li>
                         ))}
                     </ul>

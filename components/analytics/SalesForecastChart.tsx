@@ -104,8 +104,8 @@ const SalesForecastChart: React.FC = () => {
                         <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                            <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
-                            <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                            <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `shs {value}`} />
+                            <Tooltip formatter={(value: number) => `shs {value.toFixed(2)}`} />
                             <Legend />
                             <Line type="monotone" dataKey="sales" name="Historical Sales" stroke="#4f46e5" strokeWidth={2} dot={{ r: 4 }} />
                             <Line type="monotone" dataKey="profit" name="Historical Profit" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />

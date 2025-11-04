@@ -264,7 +264,7 @@ const CreditsAndInvoices: React.FC = () => {
                                         <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{c.phone}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-xs" title={c.address}>{c.address}</td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">${c.creditBalance.toFixed(2)}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">shs {c.creditBalance.toFixed(2)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -303,7 +303,7 @@ const CreditsAndInvoices: React.FC = () => {
                                         <td className="px-6 py-2 whitespace-nowrap text-base font-medium text-text-primary truncate max-w-xs" title={c.name}>{c.name}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary">{c.phone}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-base text-text-secondary truncate max-w-xs" title={c.address}>{c.address}</td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">${c.creditBalance.toFixed(2)}</td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-blue-600">shs {c.creditBalance.toFixed(2)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -385,13 +385,13 @@ const CreditsAndInvoices: React.FC = () => {
                                                     {getProductName(item.productId)}
                                                 </span>
                                                 <span className="flex-shrink-0 whitespace-nowrap">
-                                                    {item.quantity} x @ ${item.salePrice.toFixed(2)}
+                                                    {item.quantity} x @ shs {item.salePrice.toFixed(2)}
                                                 </span>
                                             </div>
                                         ))}
                                     </div>
                                 </td>
-                                <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary">${s.total.toFixed(2)}</td>
+                                <td className="px-6 py-2 whitespace-nowrap text-base font-semibold text-text-primary">shs {s.total.toFixed(2)}</td>
                                 <td className="px-6 py-2 whitespace-nowrap text-base">
                                     <span className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-full ${
                                         s.paymentStatus === 'credit' ? 'bg-yellow-100 text-yellow-800' :
@@ -458,7 +458,7 @@ const CreditsAndInvoices: React.FC = () => {
                              <div><span className="font-semibold">Address:</span> {selectedCustomer.address}</div>
                              {selectedCustomer.creditBalance > 0 && (
                                 <div className="text-lg font-bold">
-                                    Current Balance: <span className={selectedCustomer.type === 'credit' ? "text-red-600" : "text-blue-600"}>${selectedCustomer.creditBalance.toFixed(2)}</span>
+                                    Current Balance: <span className={selectedCustomer.type === 'credit' ? "text-red-600" : "text-blue-600"}>shs {selectedCustomer.creditBalance.toFixed(2)}</span>
                                 </div>
                             )}
                         </div>
@@ -510,10 +510,10 @@ const CreditsAndInvoices: React.FC = () => {
                                                 </td>
                                                 <td className="px-6 py-2 align-top whitespace-nowrap text-base text-text-secondary">{employeeName}</td>
                                                 <td className="px-6 py-2 align-top whitespace-nowrap text-base font-semibold text-right text-red-600">
-                                                    {isSale ? `$${(item as Sale).total.toFixed(2)}` : '-'}
+                                                    {isSale ? `shs {(item as Sale).total.toFixed(2)}` : '-'}
                                                 </td>
                                                 <td className="px-6 py-2 align-top whitespace-nowrap text-base font-semibold text-right text-green-600">
-                                                    {isSale ? '-' : `$${(item as Payment).amount.toFixed(2)}`}
+                                                    {isSale ? '-' : `shs {(item as Payment).amount.toFixed(2)}`}
                                                 </td>
                                             </tr>
                                         );
