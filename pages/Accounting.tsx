@@ -462,7 +462,7 @@ const Accounting: React.FC = () => {
                                             <p className="text-sm text-text-secondary">SHS {item.salePrice.toFixed(2)} (Stock: {product.stock})</p>
                                             {quantityExceedsStock && <p className="text-xs text-red-500">Not enough stock!</p>}
                                         </div>
-                                       <div className="flex items-center flex-wrap gap-2">
+                                       <div className="flex items-center gap-2">
                                             <span onClick={() => updateQuantity(item.productId, -1)} className="cursor-pointer text-gray-500 hover:text-primary w-8 h-8 flex items-center justify-center">
                                                 <MinusIcon className="w-4 h-4" />
                                             </span>
