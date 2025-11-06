@@ -124,6 +124,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
                 >
                     <MenuIcon className="h-6 w-6" />
                 </button>
+                <img src="/logo.png" alt="Logo" className="h-10 w-auto mr-4" />
                 <h1 className="text-3xl font-bold text-text-primary truncate min-w-0 flex-grow">{pageTitle}</h1>
             </div>
             <div className="flex items-center space-x-4 flex-shrink-0">
