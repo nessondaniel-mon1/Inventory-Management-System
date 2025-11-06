@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
         <div className="flex items-center justify-center min-h-screen bg-background">
             <Card className="w-full max-w-md" title="Welcome to Inventory Pro">
                 <div className="text-center mb-6">
-                    <GemIcon className="h-12 w-12 text-primary mx-auto" />
+                    <img src="/logo.png" alt="Logo" className="h-16 w-auto mx-auto" />
                     <p className="text-text-secondary mt-2">Please sign in to continue</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-4">

@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, classNam
             `}
         >
             <div className="h-20 flex items-center justify-center border-b border-slate-700">
-                <GemIcon className="h-8 w-8 text-indigo-400" />
+                <img src="/logo.png" alt="Logo" className="h-10 w-auto" />
                 <h1 className="text-2xl font-bold ml-2">Inventory Pro</h1>
             </div>
             <nav className="flex-1 px-4 py-6">
