@@ -46,6 +46,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
     const [isResultsVisible, setIsResultsVisible] = useState(false);
     const searchContainerRef = useRef<HTMLDivElement>(null);
     
+    // Notifications state
+    const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
+    const notificationsContainerRef = useRef<HTMLDivElement>(null);
+
     // Date & Time state
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
@@ -56,6 +60,17 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
 
     const formattedDate = currentDateTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const formattedTime = currentDateTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+    // Low stock & due bills
+    const lowStockProducts = products.filter(p => p.stock < p.reorderLevel);
+    const dueBills = bills.filter(b => {
+        if (!b.dueDate) return false;
+        const dueDate = new Date(b.dueDate);
+        const today = new Date();
+        const threeDaysFromNow = new Date(today.setDate(today.getDate() + 3));
+        return dueDate <= threeDaysFromNow;
+    });
+    const notificationCount = lowStockProducts.length + dueBills.length;
 
     useEffect(() => {
         if (searchQuery.trim().length > 1) {
@@ -96,6 +111,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
                 setIsResultsVisible(false);
             }
+            if (notificationsContainerRef.current && !notificationsContainerRef.current.contains(event.target as Node)) {
+                setIsNotificationsVisible(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -105,6 +123,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
         setCurrentPage(page);
         setSearchQuery('');
         setIsResultsVisible(false);
+    };
+
+    const handleNotificationClick = (page: Page) => {
+        setCurrentPage(page);
+        setIsNotificationsVisible(false);
     };
 
     let pageTitle = NAV_ITEMS.find(item => item.id === currentPage)?.label || 'Dashboard';
@@ -195,16 +218,63 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage, className,
                     <p className="font-semibold text-text-primary text-sm whitespace-nowrap">{formattedDate}</p>
                     <p className="text-base text-text-secondary whitespace-nowrap">{formattedTime}</p>
                 </div>
-                <button className="relative text-gray-500 hover:text-primary">
-                    <BellIcon className="h-6 w-6" />
-                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</span>
-                </button>
-                <div className="flex items-center space-x-3">
-                    <img src={`https://i.pravatar.cc/150?u=${currentUser?.id}`} alt="User Avatar" className="h-10 w-10 rounded-full" />
-                    <div>
-                        <p className="font-semibold text-text-primary">{currentUser?.name}</p>
-                        <p className="text-base text-text-secondary capitalize">{currentUser?.role}</p>
-                    </div>
+                <div ref={notificationsContainerRef} className="relative">
+                    <button 
+                        onClick={() => setIsNotificationsVisible(!isNotificationsVisible)}
+                        className="relative text-gray-500 hover:text-primary"
+                    >
+                        <BellIcon className="h-6 w-6" />
+                        {notificationCount > 0 && (
+                            <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                                {notificationCount}
+                            </span>
+                        )}
+                    </button>
+                    {isNotificationsVisible && (
+                        <div className="absolute top-full right-0 mt-2 w-80 bg-card border border-border rounded-md shadow-lg z-20 max-h-96 overflow-y-auto">
+                            <div className="p-3 border-b border-border">
+                                <h4 className="font-semibold text-text-primary">Notifications</h4>
+                            </div>
+                            {notificationCount > 0 ? (
+                                <>
+                                    {lowStockProducts.length > 0 && (
+                                        <div>
+                                            <h5 className="px-3 py-2 text-sm font-semibold text-text-secondary bg-gray-50 border-t border-b">Low Stock Alerts</h5>
+                                            <ul>
+                                                {lowStockProducts.map(p => (
+                                                    <li key={`low-stock-${p.id}`} onClick={() => handleNotificationClick('products')} className="px-3 py-2 hover:bg-yellow-100 cursor-pointer flex items-center gap-3">
+                                                        <PackageIcon className="w-5 h-5 text-yellow-500"/> 
+                                                        <div>
+                                                            <p className="text-sm font-medium">{p.name} is low on stock!</p>
+                                                            <p className="text-xs text-text-secondary">Current stock: {p.stock}</p>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {dueBills.length > 0 && (
+                                        <div>
+                                            <h5 className="px-3 py-2 text-sm font-semibold text-text-secondary bg-gray-50 border-t border-b">Bills Due Soon</h5>
+                                            <ul>
+                                                {dueBills.map(b => (
+                                                    <li key={`due-bill-${b.id}`} onClick={() => handleNotificationClick('payments')} className="px-3 py-2 hover:bg-yellow-100 cursor-pointer flex items-center gap-3">
+                                                        <FileTextIcon className="w-5 h-5 text-red-500"/>
+                                                        <div>
+                                                            <p className="text-sm font-medium">Bill for {b.vendor} is due</p>
+                                                            <p className="text-xs text-text-secondary">Amount: shs {b.amount.toFixed(2)}</p>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </>    
+                            ) : (
+                                <p className="p-4 text-center text-text-secondary">You have no new notifications.</p>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </header>
